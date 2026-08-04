@@ -127,7 +127,7 @@ P(new Paragraph({ spacing: { after: 60 }, border: { top: {
   style: BorderStyle.SINGLE, size: 6, color: 'C3C2B7', space: 8 } }, children: [] }));
 P(p([bd('A lumped-parameter model, its derivation, calibration and validation, '),
      tx('together with a companion browser-based simulator.')], { after: 240 }));
-P(p([tx('Prepared for '), bd('Åke Larsson'), tx(', Getinge Critical Care.')]));
+P(p([bd('Åke Larsson'), tx(' — Teknosofen.')]));
 P(p([tx('Model, source code and this document: '),
      link('github.com/Teknosofen/BallisticAnalysis',
           'https://github.com/Teknosofen/BallisticAnalysis')]));
@@ -1094,7 +1094,7 @@ P(p('This document is an engineering modelling study prepared for analysis and t
 
 /* ================================================================ ASSEMBLE */
 const doc = new Document({
-  creator: 'Interior ballistics study',
+  creator: 'Åke Larsson, Teknosofen',
   title: 'Interior Ballistics of the 5.56 × 45 mm NATO Cartridge',
   description: 'Lumped-parameter interior ballistics model, derivation, calibration and validation',
   features: { updateFields: true },

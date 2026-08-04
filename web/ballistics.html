@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>5.56 x 45 NATO - Interior Ballistics Lab Bench</title>
+<title>5.56 x 45 NATO - Interior Ballistics Lab Bench | Teknosofen</title>
+<meta name="author" content="Teknosofen">
 <style>
 :root{
   color-scheme: light;
@@ -31,12 +32,21 @@ body{
   font-family:system-ui,-apple-system,"Segoe UI",sans-serif; font-size:14px;
 }
 header{
-  display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
+  display:flex; align-items:baseline; gap:11px; flex-wrap:wrap;
   padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface-1);
   position:sticky; top:0; z-index:20;
 }
 header h1{font-size:16px; margin:0; font-weight:650; letter-spacing:-0.01em}
-header .sub{color:var(--text-secondary); font-size:12.5px}
+header .sub{
+  color:var(--text-secondary); font-size:12.5px; flex:0 1 auto; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+@media (max-width:1240px){ header .sub{display:none} }
+header .by{
+  color:var(--text-primary); font-size:12.5px; font-weight:600; white-space:nowrap;
+  border:1px solid var(--border); border-radius:999px; padding:3px 11px;
+  background:var(--panel);
+}
 header .spacer{flex:1}
 button, select, input[type=text]{
   font:inherit; color:var(--text-primary); background:var(--panel);
@@ -148,6 +158,7 @@ code{font-family:var(--mono); font-size:11.5px; background:var(--grid);
 <header>
   <h1>5.56 × 45 mm NATO — Interior Ballistics Lab Bench</h1>
   <span class="sub">Lumped-parameter model · Nobel–Abel + Vieille + Lagrange gradient</span>
+  <span class="by">By Teknosofen 2026</span>
   <span class="spacer"></span>
   <select id="preset" style="width:auto" title="Cartridge preset"></select>
   <button id="reset">Reset</button>
