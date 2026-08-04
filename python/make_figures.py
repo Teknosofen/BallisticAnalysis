@@ -176,6 +176,36 @@ for a in axes:
 fig.savefig(f"{OUT}/fig6_burnt_time.png")
 plt.close(fig)
 
+# ------------------------------------------------- figure: velocity summary
+KEY = [(10.3, "Mk18 CQBR"), (14.5, "M4 carbine"), (16.0, "16 in civilian"),
+       (18.0, "18 in"), (20.0, "M16A2 / A4")]
+fig, ax = plt.subplots(figsize=(6.6, 3.9))
+ax.plot(Ls, V, color=C["s1"], lw=2.4, zorder=3)
+lines = []
+for L, lab in KEY:
+    c2 = Charge(L_barrel=L * IN)
+    r2 = simulate(c2, dt=1e-7, store_every=10 ** 9)
+    v = r2["v_muzzle"]
+    ax.plot([L, L], [430, v], color=C["muted"], lw=0.8, ls=":", zorder=1)
+    ax.plot(L, v, "o", color=C["s1"], ms=6.5, mec="white", mew=1.6, zorder=4)
+    lines.append(f"{L:>4.1f} in   {lab:<14s}{v:5.0f} m/s   {v/0.3048:5.0f} ft/s")
+ax.text(12.6, 452, "\n".join(lines), fontsize=7.8, color=C["sec"],
+        family="DejaVu Sans Mono", linespacing=1.6, va="bottom", ha="left",
+        bbox=dict(boxstyle="round,pad=0.5", facecolor="white",
+                  edgecolor=C["grid"], linewidth=0.8))
+ax.set_xlabel("barrel length from bolt face  $L_\\mathrm{b}$  (in)")
+ax.set_ylabel("muzzle velocity  $v_\\mathrm{m}$  (m/s)")
+ax.set_title("Muzzle velocity as a function of barrel length, 5.56 × 45 NATO M855")
+ax.set_xlim(5, 26)
+ax.set_ylim(430, 1000)
+style(ax)
+sec = ax.secondary_yaxis("right", functions=(lambda v: v / 0.3048,
+                                             lambda v: v * 0.3048))
+sec.set_ylabel("muzzle velocity (ft/s)", color=C["muted"])
+sec.tick_params(colors=C["muted"])
+fig.savefig(f"{OUT}/fig9_velocity_summary.png")
+plt.close(fig)
+
 # ---------------------------------------------------------------- energy
 c = Charge(L_barrel=20 * IN)
 r = simulate(c, dt=1e-7, store_every=10 ** 9)

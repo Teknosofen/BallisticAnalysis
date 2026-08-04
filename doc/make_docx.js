@@ -98,6 +98,7 @@ function figure(file, caption, widthIn) {
     'fig3_px_vt.png': [6.9, 3.0], 'fig4_velocity_sweep.png': [6.4, 3.5],
     'fig5_muzzle_pressure.png': [6.4, 3.5], 'fig6_burnt_time.png': [6.9, 2.9],
     'fig7_energy.png': [6.4, 3.2], 'fig8_form.png': [6.4, 3.0],
+    'fig9_velocity_summary.png': [6.6, 3.9],
     'screen_shot.png': [16, 11], 'screen_sweep.png': [16, 13.49] };
   const key = file.split('/').pop();
   const ar = dims[key] ? dims[key][1] / dims[key][0] : 0.55;
@@ -796,6 +797,16 @@ P(h2('10.2  Effect of barrel length'));
 P(p('The table below is the central result. It is the same data the simulator produces '
   + 'interactively, tabulated at the barrel lengths of practical interest — 10.3 in (Mk18 '
   + 'CQBR), 11.5 in, 14.5 in (M4), 16 in (civilian minimum), 18 in, 20 in (M16A2/A4).'));
+P(...figure('fig9_velocity_summary.png',
+  'Figure 6 — Summary: muzzle velocity as a function of barrel length. The curve is '
+  + 'continuous over 5–26 in; the marked points are the barrel lengths of the standard '
+  + 'configurations. The shape is the signature of diminishing returns — the marginal gain '
+  + 'falls from 205 ft/s per inch at 5 in to 21 ft/s per inch at 22 in.'));
+P(p([tx('Figure 6 answers the velocity half of the question at a glance, and the '
+  + 'asymmetry of the curve is the point. Going from 14.5 in to 20 in — 5.5 in of extra '
+  + 'barrel — buys only 57 m/s, while cutting from 14.5 in down to 10.3 in, a shorter '
+  + 'change of 4.2 in, costs 88 m/s. Barrel length matters far more at the short end. The '
+  + 'full numerical output follows.')]));
 P(table(
   ['L_b (in)', 'L_b (mm)', 'v_m (m/s)', 'v_m (ft/s)', 'p_base at exit (MPa)', '(psi)',
    'p_breech at exit (MPa)', 't_exit (ms)', 'ψ at exit (%)', 'E_m (J)'],
@@ -817,7 +828,7 @@ P(table(
   [900, 900, 1000, 1000, 1350, 1000, 1350, 1000, 1100, 800]));
 
 P(...figure('fig1_pressure_time.png',
-  'Figure 6 — Bullet-base pressure history for three barrel lengths. The three curves are '
+  'Figure 7 — Bullet-base pressure history for three barrel lengths. The three curves are '
   + 'identical until the shortest barrel uncorks: barrel length does not change the pressure '
   + 'history, it only decides where on that history the bullet leaves. The end point of each '
   + 'curve is its muzzle pressure.'));
@@ -829,12 +840,12 @@ P(p([bd('This is the single most useful way to see the answer. '), tx('Everythin
   tx(' (385.0 MPa in every row of the table above), which is why a short-barrelled rifle is '
   + 'no harder on the case head than a long one.')]));
 P(...figure('fig3_px_vt.png',
-  'Figure 7 — Left: bullet-base pressure against bullet travel — the area under each curve, '
+  'Figure 8 — Left: bullet-base pressure against bullet travel — the area under each curve, '
   + 'multiplied by the bore area, is the work delivered to the bullet. Right: velocity '
   + 'against time, showing how the acceleration has already fallen to a small value long '
   + 'before the muzzle of a long barrel.'));
 P(...figure('fig6_burnt_time.png',
-  'Figure 8 — Left: the fraction of the charge consumed before the bullet exits. Below '
+  'Figure 9 — Left: the fraction of the charge consumed before the bullet exits. Below '
   + 'about 11.5 in the round leaves the barrel with propellant still burning. Right: barrel '
   + 'time, which grows almost linearly with barrel length.'));
 
@@ -990,11 +1001,11 @@ P(p('Every parameter in §7 is exposed as a slider, grouped by category, with th
   + 'and case volume imply a packing fraction above what spheres can achieve — or when peak '
   + 'pressure exceeds the NATO limit.'));
 P(...figure('screen_shot.png',
-  'Figure 9 — The single-shot tab of the simulator. The overlaid pressure curves for 10.5 in, '
+  'Figure 10 — The single-shot tab of the simulator. The overlaid pressure curves for 10.5 in, '
   + '14.5 in and 20 in barrels coincide exactly, each terminating at its own muzzle-exit '
   + 'point.', 6.3));
 P(...figure('screen_sweep.png',
-  'Figure 10 — The barrel-length sweep tab, with published chronograph and uncorking-pressure '
+  'Figure 11 — The barrel-length sweep tab, with published chronograph and uncorking-pressure '
   + 'measurements overlaid on the model curves.', 6.3));
 
 P(h2('12.1  Repository layout'));
