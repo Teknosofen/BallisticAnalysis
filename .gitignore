@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+_unpacked/
+_eq_omml.docx
+pg-*.jpg
+nohup.out

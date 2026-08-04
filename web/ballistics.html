@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5.56 x 45 NATO - Interior Ballistics Lab Bench</title>
+<style>
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --page:#f9f9f7;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,0.10);
+  --panel:#ffffff;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface-1:#1a1a19; --page:#0d0d0d;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
+  --panel:#141413;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--page); color:var(--text-primary);
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif; font-size:14px;
+}
+header{
+  display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
+  padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface-1);
+  position:sticky; top:0; z-index:20;
+}
+header h1{font-size:16px; margin:0; font-weight:650; letter-spacing:-0.01em}
+header .sub{color:var(--text-secondary); font-size:12.5px}
+header .spacer{flex:1}
+button, select, input[type=text]{
+  font:inherit; color:var(--text-primary); background:var(--panel);
+  border:1px solid var(--border); border-radius:7px; padding:5px 10px; cursor:pointer;
+}
+button:hover{background:var(--grid)}
+button.primary{background:var(--s1); color:#fff; border-color:transparent}
+button.primary:hover{filter:brightness(1.08)}
+.layout{display:grid; grid-template-columns:342px 1fr; gap:0; align-items:start}
+@media (max-width:1080px){.layout{grid-template-columns:1fr}}
+
+/* ---------- control panel ---------- */
+aside{
+  background:var(--surface-1); border-right:1px solid var(--border);
+  padding:14px 16px 40px; height:calc(100vh - 53px); overflow-y:auto; position:sticky; top:53px;
+}
+@media (max-width:1080px){aside{height:auto; position:static; border-right:none;
+  border-bottom:1px solid var(--border)}}
+.grp{margin-bottom:6px; border:1px solid var(--border); border-radius:9px; overflow:hidden}
+.grp>summary{
+  cursor:pointer; padding:8px 11px; font-weight:600; font-size:12.5px;
+  background:var(--panel); list-style:none; display:flex; align-items:center; gap:7px;
+}
+.grp>summary::before{content:"▸"; color:var(--muted); font-size:10px; transition:transform .12s}
+.grp[open]>summary::before{transform:rotate(90deg)}
+.grp .body{padding:8px 11px 12px}
+.ctl{margin-bottom:11px}
+.ctl .lab{display:flex; justify-content:space-between; align-items:baseline; gap:8px;
+  font-size:12px; color:var(--text-secondary); margin-bottom:3px}
+.ctl .lab .nm{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ctl .val{font-family:var(--mono); font-size:11.5px; color:var(--text-primary);
+  font-variant-numeric:tabular-nums; white-space:nowrap}
+input[type=range]{width:100%; accent-color:var(--s1); margin:0; height:18px}
+.hint{font-size:10.5px; color:var(--muted); margin-top:2px; line-height:1.35}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+select{width:100%; padding:5px 8px; font-size:12.5px}
+
+/* ---------- main ---------- */
+main{padding:16px 20px 60px; min-width:0}
+.tabs{display:flex; gap:4px; margin-bottom:14px; border-bottom:1px solid var(--border)}
+.tabs button{
+  border:none; background:none; border-radius:0; padding:7px 13px;
+  color:var(--text-secondary); font-size:13px; border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+}
+.tabs button[aria-selected=true]{color:var(--text-primary); font-weight:600;
+  border-bottom-color:var(--s1)}
+.tabs button:hover{background:transparent; color:var(--text-primary)}
+
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(146px,1fr)); gap:9px;
+  margin-bottom:16px}
+.tile{background:var(--surface-1); border:1px solid var(--border); border-radius:10px;
+  padding:10px 12px}
+.tile .k{font-size:11px; color:var(--text-secondary); margin-bottom:4px; line-height:1.25}
+.tile .v{font-size:21px; font-weight:600; letter-spacing:-0.02em; line-height:1.1}
+.tile .u{font-size:11.5px; color:var(--muted); font-weight:400; margin-left:3px}
+.tile .alt{font-size:11px; color:var(--muted); margin-top:3px; font-variant-numeric:tabular-nums}
+.tile.hi{border-color:var(--s1)}
+
+.charts{display:grid; grid-template-columns:repeat(auto-fit,minmax(430px,1fr)); gap:12px}
+@media (max-width:760px){.charts{grid-template-columns:1fr}}
+figure{margin:0; background:var(--surface-1); border:1px solid var(--border);
+  border-radius:11px; padding:12px 13px 10px}
+figure figcaption{font-size:13px; font-weight:600; margin-bottom:1px}
+figure .note{font-size:11.5px; color:var(--text-secondary); margin-bottom:8px}
+.legend{display:flex; flex-wrap:wrap; gap:11px; margin-top:8px; font-size:11.5px;
+  color:var(--text-secondary)}
+.legend span{display:inline-flex; align-items:center; gap:5px}
+.legend i{width:11px; height:3px; border-radius:2px; display:inline-block}
+.legend i.dot{width:8px; height:8px; border-radius:50%}
+.cwrap{position:relative}
+canvas{display:block; width:100%; touch-action:none}
+.tip{position:absolute; pointer-events:none; background:var(--panel);
+  border:1px solid var(--border); border-radius:8px; padding:7px 9px; font-size:11.5px;
+  box-shadow:0 4px 14px rgba(0,0,0,.13); opacity:0; transition:opacity .08s;
+  font-variant-numeric:tabular-nums; white-space:nowrap; z-index:5; line-height:1.5}
+.tip b{font-weight:600}
+.tip .r{display:flex; justify-content:space-between; gap:12px}
+.tip i{width:9px;height:3px;border-radius:2px;display:inline-block;margin-right:5px;
+  vertical-align:middle}
+
+table.data{width:100%; border-collapse:collapse; font-size:12px;
+  font-variant-numeric:tabular-nums; margin-top:4px}
+table.data th{text-align:right; padding:5px 7px; border-bottom:1px solid var(--axis);
+  color:var(--text-secondary); font-weight:600; font-size:11px; white-space:nowrap}
+table.data th:first-child, table.data td:first-child{text-align:left}
+table.data td{text-align:right; padding:4px 7px; border-bottom:1px solid var(--grid)}
+table.data tr:hover td{background:var(--grid)}
+.tblwrap{max-height:420px; overflow:auto}
+.msg{font-size:12px; color:var(--text-secondary); background:var(--panel);
+  border:1px solid var(--border); border-left:3px solid var(--s4);
+  border-radius:0 8px 8px 0; padding:9px 12px; margin-bottom:14px; line-height:1.5}
+.msg.bad{border-left-color:var(--crit)}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; align-items:center}
+.chip{border:1px solid var(--border); background:var(--panel); border-radius:999px;
+  padding:3px 11px; font-size:12px; cursor:pointer; user-select:none;
+  display:inline-flex; align-items:center; gap:6px}
+.chip[aria-pressed=true]{border-color:transparent; color:#fff}
+.chip i{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.9}
+.chip[aria-pressed=false] i{opacity:.35}
+h3.sec{font-size:12px; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--muted); margin:22px 0 9px; font-weight:600}
+code{font-family:var(--mono); font-size:11.5px; background:var(--grid);
+  padding:1px 4px; border-radius:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>5.56 × 45 mm NATO — Interior Ballistics Lab Bench</h1>
+  <span class="sub">Lumped-parameter model · Nobel–Abel + Vieille + Lagrange gradient</span>
+  <span class="spacer"></span>
+  <select id="preset" style="width:auto" title="Cartridge preset"></select>
+  <button id="reset">Reset</button>
+  <button id="csv">Export CSV</button>
+  <button id="theme" title="Toggle light/dark">◑</button>
+</header>
+
+<div class="layout">
+<aside id="panel"></aside>
+
+<main>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true"  data-tab="shot">Single shot</button>
+    <button role="tab" aria-selected="false" data-tab="sweep">Barrel-length sweep</button>
+    <button role="tab" aria-selected="false" data-tab="energy">Energy &amp; diagnostics</button>
+    <button role="tab" aria-selected="false" data-tab="table">Data table</button>
+  </div>
+  <div id="warn"></div>
+
+  <!-- ============ TAB: single shot ============ -->
+  <section id="tab-shot">
+    <div class="tiles" id="tiles"></div>
+
+    <div class="chips" id="chips">
+      <span style="font-size:12px;color:var(--text-secondary);margin-right:2px">
+        Overlay barrel lengths (in):</span>
+    </div>
+
+    <div class="charts">
+      <figure>
+        <figcaption>Pressure vs time — pressure stations</figcaption>
+        <div class="note">Current barrel. The Lagrange gradient separates breech,
+          space-mean and bullet-base pressure.</div>
+        <div class="cwrap"><canvas id="cPt"></canvas><div class="tip" id="tPt"></div></div>
+        <div class="legend" id="lPt"></div>
+      </figure>
+
+      <figure>
+        <figcaption>Bullet-base pressure vs time — barrel-length overlay</figcaption>
+        <div class="note">The curves are identical until the shorter barrel
+          uncorks; the end point of each curve is its muzzle pressure.</div>
+        <div class="cwrap"><canvas id="cPtL"></canvas><div class="tip" id="tPtL"></div></div>
+        <div class="legend" id="lPtL"></div>
+      </figure>
+
+      <figure>
+        <figcaption>Bullet-base pressure vs bullet travel</figcaption>
+        <div class="note">Area under this curve × bore area = work done on the bullet.</div>
+        <div class="cwrap"><canvas id="cPx"></canvas><div class="tip" id="tPx"></div></div>
+        <div class="legend" id="lPx"></div>
+      </figure>
+
+      <figure>
+        <figcaption>Bullet velocity vs time</figcaption>
+        <div class="note">Each curve ends at its muzzle-exit instant.</div>
+        <div class="cwrap"><canvas id="cVt"></canvas><div class="tip" id="tVt"></div></div>
+        <div class="legend" id="lVt"></div>
+      </figure>
+
+      <figure>
+        <figcaption>Bullet travel vs time</figcaption>
+        <div class="note">Position of the bullet base measured from its seated position.</div>
+        <div class="cwrap"><canvas id="cXt"></canvas><div class="tip" id="tXt"></div></div>
+        <div class="legend" id="lXt"></div>
+      </figure>
+
+      <figure>
+        <figcaption>Burnt mass fraction vs time</figcaption>
+        <div class="note">Current barrel. ψ = 1 means the whole charge has been
+          consumed inside the bore.</div>
+        <div class="cwrap"><canvas id="cPsi"></canvas><div class="tip" id="tPsi"></div></div>
+        <div class="legend" id="lPsi"></div>
+      </figure>
+
+      <figure>
+        <figcaption>Mean gas temperature vs time</figcaption>
+        <div class="note">From the Nobel&ndash;Abel equation of state. Falls as the
+          gas expands and loses heat to the barrel.</div>
+        <div class="cwrap"><canvas id="cT"></canvas><div class="tip" id="tT"></div></div>
+        <div class="legend" id="lT"></div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ TAB: sweep ============ -->
+  <section id="tab-sweep" hidden>
+    <div class="msg" id="sweepnote"></div>
+    <div class="charts">
+      <figure>
+        <figcaption>Muzzle velocity vs barrel length</figcaption>
+        <div class="note">Model curve with published M855 chronograph data overlaid.</div>
+        <div class="cwrap"><canvas id="sV"></canvas><div class="tip" id="tsV"></div></div>
+        <div class="legend" id="lsV"></div>
+      </figure>
+      <figure>
+        <figcaption>Muzzle pressure at bullet exit vs barrel length</figcaption>
+        <div class="note">"Uncorking" pressure — the quantity that drives blast,
+          flash and suppressor loading.</div>
+        <div class="cwrap"><canvas id="sP"></canvas><div class="tip" id="tsP"></div></div>
+        <div class="legend" id="lsP"></div>
+      </figure>
+      <figure>
+        <figcaption>Muzzle energy vs barrel length</figcaption>
+        <div class="note">Diminishing returns: the marginal gain falls steadily as
+          the barrel lengthens.</div>
+        <div class="cwrap"><canvas id="sG"></canvas><div class="tip" id="tsG"></div></div>
+        <div class="legend" id="lsG"></div>
+      </figure>
+      <figure>
+        <figcaption>Burnt fraction at bullet exit vs barrel length</figcaption>
+        <div class="note">Short barrels uncork before the charge is consumed —
+          the unburnt propellant is ejected and burns outside as muzzle flash.</div>
+        <div class="cwrap"><canvas id="sB"></canvas><div class="tip" id="tsB"></div></div>
+        <div class="legend" id="lsB"></div>
+      </figure>
+      <figure>
+        <figcaption>Muzzle-exit time vs barrel length</figcaption>
+        <div class="note">Barrel time — how long the bullet is subject to bore
+          disturbances before it leaves.</div>
+        <div class="cwrap"><canvas id="sT"></canvas><div class="tip" id="tsT"></div></div>
+        <div class="legend" id="lsT"></div>
+      </figure>
+      <figure>
+        <figcaption>Velocity gain per extra inch of barrel</figcaption>
+        <div class="note">The marginal return on barrel length, in ft/s per inch.</div>
+        <div class="cwrap"><canvas id="sD"></canvas><div class="tip" id="tsD"></div></div>
+        <div class="legend" id="lsD"></div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ TAB: energy ============ -->
+  <section id="tab-energy" hidden>
+    <div class="charts">
+      <figure>
+        <figcaption>Energy budget at muzzle exit</figcaption>
+        <div class="note">Where the chemical energy of the charge ends up.
+          Current barrel length.</div>
+        <div class="cwrap"><canvas id="eBar"></canvas><div class="tip" id="teBar"></div></div>
+        <div class="legend" id="leBar"></div>
+      </figure>
+      <figure>
+        <figcaption>Gas-port pressure vs time</figcaption>
+        <div class="note">Pressure at the gas-port station, from the moment the
+          bullet base uncovers the port until muzzle exit.</div>
+        <div class="cwrap"><canvas id="ePort"></canvas><div class="tip" id="tePort"></div></div>
+        <div class="legend" id="lePort"></div>
+      </figure>
+    </div>
+    <h3 class="sec">Derived quantities</h3>
+    <div class="tiles" id="tiles2"></div>
+    <h3 class="sec">Numerical convergence</h3>
+    <div class="msg" id="conv"></div>
+  </section>
+
+  <!-- ============ TAB: table ============ -->
+  <section id="tab-table" hidden>
+    <h3 class="sec">Barrel-length sweep</h3>
+    <div class="tblwrap"><table class="data" id="tblSweep"></table></div>
+    <h3 class="sec">Time history — current barrel (every 20th stored step)</h3>
+    <div class="tblwrap"><table class="data" id="tblHist"></table></div>
+  </section>
+</main>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   5.56 x 45 NATO interior ballistics - lumped parameter model
+   Mirrors python/interior_ballistics.py in the same repository.
+   ===================================================================== */
+
+const GR = 6.479891e-5;      // kg per grain
+const PSI = 6894.757;        // Pa per psi
+const IN = 0.0254;           // m per inch
+const FPS = 0.3048;          // m per foot
+
+/* ---------- form functions: psi(z) = chi*z*(1 + lam*z + mu*z^2) ---------- */
+const FORMS = {
+  sphere:        {chi:3,      lam:-1,    mu:1/3, label:"Sphere (bare ball) — degressive"},
+  cylinder:      {chi:2,      lam:-0.5,  mu:0,   label:"Solid cylinder — degressive"},
+  flake:         {chi:1.06,   lam:-0.06, mu:0,   label:"Flake / disc — near neutral"},
+  tube:          {chi:1,      lam:0,     mu:0,   label:"Single-perf tube — neutral"},
+  ball_deterred: {chi:0.7247, lam:0.3799,mu:0,   label:"Deterred flattened ball (WC 844 fit)"},
+  perf7:         {chi:0.70,   lam:0.43,  mu:0,   label:"Seven-perforation — progressive"},
+  custom:        {chi:0.7247, lam:0.3799,mu:0,   label:"Custom (use λ slider)"}
+};
+
+/* ---------- default parameter set: M855 / 5.56x45 NATO ---------- */
+const DEFAULTS = {
+  // projectile & bore
+  m_b_gr:  62.0,      // bullet mass                       [grain]
+  d_bore:  5.65,      // effective bore diameter           [mm]
+  x_b0:    34.3,      // bullet base from bolt face        [mm]
+  // chamber
+  V0:      1.65,      // free chamber volume behind bullet [cm^3]
+  // propellant
+  m_c_gr:  25.0,      // charge mass                       [grain]
+  rho_p:   1600,      // solid density                     [kg/m^3]
+  f_imp:   1.00,      // impetus (force constant)          [MJ/kg]
+  T_v:     2850,      // adiabatic flame temperature       [K]
+  alpha:   1.00,      // covolume                          [cm^3/g]
+  gamma:   1.24,      // ratio of specific heats           [-]
+  e1:      0.130,     // half-web (burn distance)          [mm]
+  a_burn:  3.90773,   // Vieille coefficient   [1e-8 m/(s Pa^n)]
+  n_burn:  0.80,      // Vieille exponent                  [-]
+  form:    "ball_deterred",
+  lam:     0.3799,    // form-function progressivity       [-]
+  // losses
+  p_ign:   15,        // primer / igniter pressure         [MPa]
+  p_start: 30,        // shot-start (engraving) pressure   [MPa]
+  p_fric:  10,        // residual bore resistance          [MPa]
+  K_fric:  1.02,      // extra secondary-work factor       [-]
+  h_wall:  3.333,     // wall heat-transfer coeff  [1e5 W/m^2K]
+  T_wall:  300,       // initial wall temperature          [K]
+  // weapon
+  L_bbl:   20.0,      // barrel length from bolt face      [in]
+  x_port:  12.0,      // gas port from bolt face           [in]
+  // numerics
+  dt:      0.5        // time step                         [us]
+};
+
+const PRESETS = {
+  "M855 / SS109 62 gr (default)": {},
+  "M193 55 gr": {m_b_gr:55.0, m_c_gr:25.8, x_b0:36.0, a_burn:4.15, L_bbl:20},
+  "Mk262 Mod 1 77 gr": {m_b_gr:77.0, m_c_gr:23.3, x_b0:30.0, a_burn:3.60, L_bbl:18},
+  "M4 carbine, M855 (14.5 in)": {L_bbl:14.5, x_port:7.5},
+  "Mk18 CQBR, M855 (10.3 in)": {L_bbl:10.3, x_port:6.75},
+  "Mid-length 16 in, M855": {L_bbl:16.0, x_port:9.75}
+};
+
+/* ---------- control definitions for the side panel ---------- */
+const GROUPS = [
+  ["Weapon geometry", true, [
+    ["L_bbl",  "Barrel length (from bolt face)", 4, 30, 0.1, "in", v=>`${v.toFixed(1)} in = ${(v*25.4).toFixed(0)} mm`],
+    ["x_port", "Gas port position", 3, 26, 0.25, "in", v=>`${v.toFixed(2)} in`],
+    ["x_b0",   "Bullet base at rest, from bolt face", 20, 50, 0.1, "mm", v=>`${v.toFixed(1)} mm`],
+    ["d_bore", "Effective bore diameter", 5.4, 5.9, 0.01, "mm",
+      v=>`${v.toFixed(2)} mm → A = ${(Math.PI/4*v*v).toFixed(2)} mm²`]
+  ]],
+  ["Projectile & charge", true, [
+    ["m_b_gr", "Bullet mass", 35, 90, 0.5, "gr", v=>`${v.toFixed(1)} gr = ${(v*GR*1e3).toFixed(2)} g`],
+    ["m_c_gr", "Propellant charge mass", 12, 32, 0.1, "gr", v=>`${v.toFixed(1)} gr = ${(v*GR*1e3).toFixed(3)} g`],
+    ["V0",     "Free chamber volume behind bullet", 1.0, 2.4, 0.01, "cm³", v=>`${v.toFixed(2)} cm³`]
+  ]],
+  ["Propellant thermochemistry", false, [
+    ["f_imp",  "Impetus (force constant) f = R·T_v", 0.80, 1.20, 0.005, "MJ/kg", v=>`${v.toFixed(3)} MJ/kg`],
+    ["T_v",    "Adiabatic flame temperature T_v", 2200, 3400, 10, "K", v=>`${v.toFixed(0)} K`],
+    ["alpha",  "Covolume α", 0.6, 1.5, 0.01, "cm³/g", v=>`${v.toFixed(2)} cm³/g`],
+    ["gamma",  "Ratio of specific heats γ", 1.15, 1.35, 0.005, "-", v=>`${v.toFixed(3)}`],
+    ["rho_p",  "Solid propellant density ρ_p", 1400, 1750, 5, "kg/m³", v=>`${v.toFixed(0)} kg/m³`]
+  ]],
+  ["Burning law & grain geometry", false, [
+    ["a_burn", "Vieille coefficient a", 0.5, 12, 0.01, "×10⁻⁸", v=>`${v.toFixed(2)}e-8 m/(s·Paⁿ)`],
+    ["n_burn", "Vieille exponent n", 0.50, 1.05, 0.005, "-", v=>`${v.toFixed(3)}`],
+    ["e1",     "Half-web e₁ (burn distance)", 0.03, 0.45, 0.001, "mm", v=>`${v.toFixed(3)} mm`],
+    ["lam",    "Form-function progressivity λ", -0.9, 2.0, 0.005, "-",
+      v=>`${v.toFixed(3)} → χ = ${(1/(1+v)).toFixed(3)} ${v>0.02?"(progressive)":v<-0.02?"(degressive)":"(neutral)"}`]
+  ]],
+  ["Losses & resistance", false, [
+    ["p_ign",   "Primer / igniter pressure", 2, 60, 0.5, "MPa", v=>`${v.toFixed(1)} MPa`],
+    ["p_start", "Shot-start (engraving) pressure", 0, 90, 1, "MPa", v=>`${v.toFixed(0)} MPa = ${(v*1e6/PSI/1000).toFixed(1)} kpsi`],
+    ["p_fric",  "Residual bore resistance", 0, 40, 0.5, "MPa", v=>`${v.toFixed(1)} MPa`],
+    ["K_fric",  "Secondary-work factor K", 1.00, 1.25, 0.005, "-", v=>`${v.toFixed(3)}`],
+    ["h_wall",  "Wall heat-transfer coefficient h", 0, 12, 0.01, "×10⁵", v=>`${v.toFixed(2)}e5 W/m²K`],
+    ["T_wall",  "Wall temperature", 250, 800, 5, "K", v=>`${v.toFixed(0)} K`]
+  ]],
+  ["Numerics", false, [
+    ["dt", "Integration time step Δt", 0.05, 4, 0.05, "µs", v=>`${v.toFixed(2)} µs (RK4)`]
+  ]]
+];
+
+/* ---------- published validation data (M855 / 62 gr) ---------- */
+const VEL_DATA = [
+  {L:7.0,  fps:2257, src:"Lucky Gunner"}, {L:10.5, fps:2653, src:"Lucky Gunner"},
+  {L:14.5, fps:2920, src:"Lucky Gunner"}, {L:16.0, fps:2990, src:"Lucky Gunner"},
+  {L:18.0, fps:3058, src:"Lucky Gunner"}, {L:22.0, fps:3110, src:"Lucky Gunner"},
+  {L:14.5, fps:2700, src:"SADJ / Watters"}, {L:20.0, fps:2979, src:"SADJ / Watters"},
+  {L:16.1, fps:2932, src:"TFB"}, {L:20.0, fps:3059, src:"TFB"}
+];
+const PMUZ_DATA = [
+  {L:24, psi:4800}, {L:14.5, psi:8150}, {L:10.5, psi:11500}, {L:7, psi:17140}
+];
+
+/* =====================================================================
+   Model
+   ===================================================================== */
+function build(P){
+  const c = {};
+  c.m_b   = P.m_b_gr * GR;
+  c.d     = P.d_bore * 1e-3;
+  c.A     = 0.25*Math.PI*c.d*c.d;
+  c.x_b0  = P.x_b0 * 1e-3;
+  c.V0    = P.V0 * 1e-6;
+  c.m_c   = P.m_c_gr * GR;
+  c.rho_p = P.rho_p;
+  c.f     = P.f_imp * 1e6;
+  c.T_v   = P.T_v;
+  c.alpha = P.alpha * 1e-3;
+  c.gamma = P.gamma;
+  c.theta = P.gamma - 1;
+  c.e1    = P.e1 * 1e-3;
+  c.a     = P.a_burn * 1e-8;
+  c.n     = P.n_burn;
+  const F = (P.form === "custom") ? {chi:1/(1+P.lam), lam:P.lam, mu:0} : FORMS[P.form];
+  c.chi = F.chi; c.lam = F.lam; c.mu = F.mu;
+  c.p_ign   = P.p_ign   * 1e6;
+  c.p_start = P.p_start * 1e6;
+  c.p_fric  = P.p_fric  * 1e6;
+  c.K       = P.K_fric;
+  c.h       = P.h_wall * 1e5;
+  c.T_wall  = P.T_wall;
+  c.L_bbl   = P.L_bbl * IN;
+  c.x_port  = P.x_port * IN;
+  c.dt      = P.dt * 1e-6;
+
+  c.phi   = c.K + c.m_c/(3*c.m_b);
+  c.zeta  = c.m_c/c.m_b;
+  c.L0    = c.V0/c.A;
+  c.travel= c.L_bbl - c.x_b0;
+  c.dens  = c.m_c/c.V0;
+  c.pack  = (c.m_c/c.rho_p)/c.V0;
+  return c;
+}
+
+const psiOf = (c,z)=> z<=0 ? 0 : z>=1 ? 1 : Math.min(c.chi*z*(1 + c.lam*z + c.mu*z*z), 1);
+
+function zOfPsi(c,t){
+  let lo=0, hi=1;
+  for(let i=0;i<80;i++){ const m=0.5*(lo+hi); if(psiOf(c,m)<t) lo=m; else hi=m; }
+  return 0.5*(lo+hi);
+}
+function initialZ(c){
+  const Vg0 = c.V0 - c.m_c/c.rho_p;                       // initial ullage
+  const den = c.f*c.m_c - c.p_ign*c.m_c*(1/c.rho_p - c.alpha);
+  let psi0 = c.p_ign*Vg0/den;
+  if(!isFinite(psi0) || psi0<=0) psi0 = 1e-9;
+  return zOfPsi(c, Math.min(Math.max(psi0,1e-9), 0.5));
+}
+
+/** State: y = [z, x, v, Q]. Returns {p, psi, V, T}. */
+function gasState(c,y){
+  const psi = psiOf(c,y[0]);
+  let V = c.V0 + c.A*y[1] - c.m_c*(1-psi)/c.rho_p - c.alpha*c.m_c*psi;
+  if(V < 1e-12) V = 1e-12;
+  const Wf = c.p_fric*c.A*y[1];
+  const num = c.f*c.m_c*psi - c.theta*(0.5*c.phi*c.m_b*y[2]*y[2] + y[3] + Wf);
+  const p = Math.max(num/V, 0);
+  const mg = Math.max(c.m_c*psi, 1e-12);
+  const T = p*V*c.T_v/(c.f*mg);
+  return {p, psi, V, T};
+}
+const pBreech = (c,p)=> p*(1 + c.zeta/2)/(1 + c.zeta/3);
+const pBase   = (c,p)=> p/(1 + c.zeta/3);
+const wetted  = (c,x)=> Math.PI*c.d*(c.L0 + x) + 2*c.A;
+
+function derivs(c,y,out){
+  const s = gasState(c,y);
+  out[0] = (y[0] < 1 && s.p > 0) ? c.a*Math.pow(s.p, c.n)/c.e1 : 0;
+  out[1] = y[2];
+  if(y[2] <= 0 && s.p < c.p_start){ out[2] = 0; }
+  else {
+    let dv = c.A*(s.p - c.p_fric)/(c.phi*c.m_b);
+    if(dv < 0 && y[2] <= 0) dv = 0;
+    out[2] = dv;
+  }
+  out[3] = Math.max(c.h*wetted(c,y[1])*(s.T - c.T_wall), 0);
+  return s;
+}
+
+function simulate(c, opts){
+  opts = opts || {};
+  const keep = opts.keep !== false;
+  const dt = c.dt, xmax = c.travel, tMax = 1e-2;
+  const portTravel = c.x_port - c.x_b0;
+  let y = [initialZ(c), 0, 0, 0], t = 0, n = 0;
+  const H = keep ? {t:[],x:[],v:[],p:[],pb:[],pa:[],psi:[],z:[],pp:[],T:[]} : null;
+  const every = Math.max(1, Math.round((2e-7)/dt));
+  let peak = 0, tPeak = 0, portExit = 0, portPeak = 0, aMax = 0;
+  const k1=[0,0,0,0],k2=[0,0,0,0],k3=[0,0,0,0],k4=[0,0,0,0],tmp=[0,0,0,0];
+
+  while(t < tMax){
+    const s = gasState(c,y);
+    const pb = pBreech(c,s.p), pa = pBase(c,s.p);
+    const L = c.L0 + y[1], yp = c.L0 + Math.max(portTravel,0);
+    let pp = NaN;
+    if(y[1] >= portTravel && L > 0){
+      const r = Math.min(yp/L, 1);
+      pp = pb*(c.m_b + 0.5*c.m_c*(1-r*r))/(c.m_b + 0.5*c.m_c);
+    }
+    if(isFinite(pp) && pp > portPeak) portPeak = pp;
+    if(pb > peak){ peak = pb; tPeak = t; }
+    const acc = c.A*Math.max(s.p - c.p_fric,0)/(c.phi*c.m_b);
+    if(acc > aMax) aMax = acc;
+
+    if(keep && (n % every === 0)){
+      H.t.push(t); H.x.push(y[1]); H.v.push(y[2]); H.p.push(s.p);
+      H.pb.push(pb); H.pa.push(pa); H.psi.push(s.psi);
+      H.z.push(Math.min(y[0],1)); H.pp.push(pp); H.T.push(s.T);
+    }
+    if(y[1] >= xmax){ portExit = isFinite(pp)?pp:0; break; }
+
+    derivs(c,y,k1);
+    for(let i=0;i<4;i++) tmp[i] = y[i] + 0.5*dt*k1[i];
+    derivs(c,tmp,k2);
+    for(let i=0;i<4;i++) tmp[i] = y[i] + 0.5*dt*k2[i];
+    derivs(c,tmp,k3);
+    for(let i=0;i<4;i++) tmp[i] = y[i] + dt*k3[i];
+    derivs(c,tmp,k4);
+    for(let i=0;i<4;i++) y[i] += dt/6*(k1[i] + 2*k2[i] + 2*k3[i] + k4[i]);
+    if(y[0] > 1) y[0] = 1;
+    t += dt; n++;
+  }
+
+  const s = gasState(c,y);
+  const pb = pBreech(c,s.p), pa = pBase(c,s.p);
+  if(keep){
+    H.t.push(t); H.x.push(y[1]); H.v.push(y[2]); H.p.push(s.p);
+    H.pb.push(pb); H.pa.push(pa); H.psi.push(s.psi);
+    H.z.push(Math.min(y[0],1)); H.pp.push(portExit||NaN); H.T.push(s.T);
+  }
+  return {
+    tExit:t, v:y[2], x:y[1], Q:y[3],
+    pMean:s.p, pBreech:pb, pBase:pa, T:s.T, psi:s.psi, V:s.V,
+    peak, tPeak, portExit, portPeak, aMax, H
+  };
+}
+
+function energyBudget(c,r){
+  const v = r.v;
+  const chem     = c.m_c*c.f/c.theta;
+  const kinetic  = 0.5*c.m_b*v*v;
+  const gasKin   = c.m_c*v*v/6;
+  const friction = c.p_fric*c.A*r.x;
+  const internal = r.pMean*r.V/c.theta;
+  const heat     = r.Q;
+  const unburnt  = (1-r.psi)*c.m_c*c.f/c.theta;
+  const total    = kinetic+gasKin+friction+internal+heat+unburnt;
+  return {chem,kinetic,gasKin,friction,internal,heat,unburnt,total,
+          closure:(total-chem)/chem};
+}
+
+/* =====================================================================
+   Minimal canvas chart layer (line + scatter + bar), with hover crosshair
+   ===================================================================== */
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+const SERIES = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7","--s8"];
+
+function niceTicks(lo,hi,n){
+  if(!(isFinite(lo)&&isFinite(hi)) || hi<=lo){ hi = lo+1; }
+  const raw=(hi-lo)/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), norm=raw/mag;
+  const step=(norm<=1?1:norm<=2?2:norm<=2.5?2.5:norm<=5?5:10)*mag;
+  const t=[]; for(let v=Math.ceil(lo/step)*step; v<=hi+step*1e-9; v+=step) t.push(+v.toFixed(10));
+  t.dec = Math.max(0, Math.min(4, -Math.floor(Math.log10(step)) + (step*Math.pow(10,-Math.floor(Math.log10(step)))%1?1:0)));
+  return t;
+}
+const fmt=(v,d)=> Math.abs(v)>=1e4 ? v.toExponential(2)
+      : (+v).toFixed(d!==undefined?d:(Math.abs(v)>=100?0:Math.abs(v)>=10?1:Math.abs(v)>=1?2:3));
+
+/** spec: {series:[{name,color,x:[],y:[],dash?,type?}], xlab, ylab, xfmt, yfmt, x0? } */
+function drawChart(canvas, tipEl, legendEl, spec){
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth || 420, Hh = spec.height || 250;
+  canvas.width = W*dpr; canvas.height = Hh*dpr; canvas.style.height = Hh+"px";
+  const g = canvas.getContext("2d");
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,Hh);
+
+  const S = spec.series.filter(s=>s.x && s.x.length);
+  const pad = {l:56, r:12, t:8, b:34};
+  const pw = W-pad.l-pad.r, ph = Hh-pad.t-pad.b;
+
+  let xlo=Infinity,xhi=-Infinity,ylo=Infinity,yhi=-Infinity;
+  for(const s of S){ for(let i=0;i<s.x.length;i++){
+    const X=s.x[i], Y=s.y[i];
+    if(isFinite(X)){ if(X<xlo)xlo=X; if(X>xhi)xhi=X; }
+    if(isFinite(Y)){ if(Y<ylo)ylo=Y; if(Y>yhi)yhi=Y; }
+  }}
+  if(!isFinite(xlo)){ xlo=0; xhi=1; ylo=0; yhi=1; }
+  if(spec.x0) xlo = Math.min(xlo,0);
+  if(spec.y0 !== false) ylo = Math.min(ylo,0);
+  if(yhi===ylo) yhi = ylo+1;
+  if(xhi===xlo) xhi = xlo+1;
+  yhi += (yhi-ylo)*0.08;
+  if(spec.xmin!==undefined) xlo=spec.xmin;
+  if(spec.xmax!==undefined) xhi=spec.xmax;
+
+  const sx = v=> pad.l + (v-xlo)/(xhi-xlo)*pw;
+  const sy = v=> pad.t + ph - (v-ylo)/(yhi-ylo)*ph;
+
+  // grid
+  const xt = niceTicks(xlo,xhi,6), yt = niceTicks(ylo,yhi,5);
+  g.strokeStyle = css("--grid"); g.lineWidth = 1;
+  g.beginPath();
+  for(const v of yt){ const y=Math.round(sy(v))+0.5; g.moveTo(pad.l,y); g.lineTo(W-pad.r,y); }
+  g.stroke();
+  g.strokeStyle = css("--axis");
+  g.beginPath(); g.moveTo(pad.l, pad.t); g.lineTo(pad.l, pad.t+ph);
+  g.lineTo(W-pad.r, pad.t+ph); g.stroke();
+
+  g.fillStyle = css("--muted");
+  g.font = "11px system-ui,sans-serif";
+  g.textAlign="right"; g.textBaseline="middle";
+  for(const v of yt) g.fillText(spec.yfmt?spec.yfmt(v):v.toFixed(yt.dec), pad.l-7, sy(v));
+  g.textAlign="center"; g.textBaseline="top";
+  for(const v of xt) g.fillText(spec.xfmt?spec.xfmt(v):v.toFixed(xt.dec), sx(v), pad.t+ph+7);
+
+  g.save();
+  g.translate(12, pad.t+ph/2); g.rotate(-Math.PI/2);
+  g.textAlign="center"; g.textBaseline="middle"; g.fillStyle = css("--text-secondary");
+  g.font = "11.5px system-ui,sans-serif";
+  g.fillText(spec.ylab||"", 0, 0); g.restore();
+  g.textAlign="center"; g.textBaseline="bottom";
+  g.fillText(spec.xlab||"", pad.l+pw/2, Hh-1);
+
+  // marks (optionally reversed so early-ending curves sit on top)
+  const D = spec.reverseDraw ? S.slice().reverse() : S;
+  for(const s of D){
+    if(s.type==="scatter"){
+      g.fillStyle = css(s.color);
+      g.strokeStyle = css("--surface-1"); g.lineWidth = 2;
+      for(let i=0;i<s.x.length;i++){
+        g.beginPath(); g.arc(sx(s.x[i]), sy(s.y[i]), 4.5, 0, 6.2832);
+        g.fill(); g.stroke();
+      }
+    } else if(s.type==="bar"){
+      const bw = Math.min(46, pw/(s.x.length*1.5));
+      g.fillStyle = css(s.color);
+      for(let i=0;i<s.x.length;i++){
+        const x = sx(s.x[i]) - bw/2, y = sy(Math.max(s.y[i],0)), h = sy(0)-y;
+        g.beginPath();
+        const rr = Math.min(4, h/2, bw/2);
+        g.moveTo(x, y+h); g.lineTo(x, y+rr); g.quadraticCurveTo(x, y, x+rr, y);
+        g.lineTo(x+bw-rr, y); g.quadraticCurveTo(x+bw, y, x+bw, y+rr);
+        g.lineTo(x+bw, y+h); g.closePath(); g.fill();
+      }
+    } else {
+      g.strokeStyle = css(s.color); g.lineWidth = s.w || 2;
+      g.setLineDash(s.dash||[]); g.lineJoin="round"; g.lineCap="round";
+      g.beginPath();
+      let started=false;
+      for(let i=0;i<s.x.length;i++){
+        const X=sx(s.x[i]), Y=sy(s.y[i]);
+        if(!isFinite(X)||!isFinite(Y)){ started=false; continue; }
+        if(!started){ g.moveTo(X,Y); started=true; } else g.lineTo(X,Y);
+      }
+      g.stroke(); g.setLineDash([]);
+      if(s.endDot && s.x.length){
+        let i=s.x.length-1;
+        while(i>0 && !(isFinite(s.x[i])&&isFinite(s.y[i]))) i--;
+        g.fillStyle=css(s.color); g.strokeStyle=css("--surface-1"); g.lineWidth=2;
+        g.beginPath(); g.arc(sx(s.x[i]), sy(s.y[i]), 4, 0, 6.2832); g.fill(); g.stroke();
+      }
+    }
+  }
+
+  // legend
+  if(legendEl){
+    legendEl.innerHTML = S.filter(s=>s.name).map(s=>
+      `<span><i class="${s.type==='scatter'?'dot':''}" style="background:${css(s.color)}${
+        s.dash&&s.dash.length?';background:repeating-linear-gradient(90deg,'+css(s.color)+' 0 4px,transparent 4px 7px)':''
+      }"></i>${s.name}</span>`).join("");
+  }
+
+  // hover
+  if(tipEl){
+    const onMove = ev=>{
+      const rect = canvas.getBoundingClientRect();
+      const mx = ev.clientX-rect.left, my = ev.clientY-rect.top;
+      if(mx<pad.l-6||mx>W-pad.r+6||my<pad.t-6||my>pad.t+ph+6){ tipEl.style.opacity=0; return; }
+      const xv = xlo + (mx-pad.l)/pw*(xhi-xlo);
+      const rows=[];
+      let best=null;
+      for(const s of S){
+        if(s.noTip) continue;
+        let bi=-1, bd=Infinity;
+        for(let i=0;i<s.x.length;i++){
+          if(!isFinite(s.x[i])||!isFinite(s.y[i])) continue;
+          const d = s.type==="scatter" || s.type==="bar"
+            ? Math.hypot(sx(s.x[i])-mx, sy(s.y[i])-my) : Math.abs(s.x[i]-xv);
+          if(d<bd){ bd=d; bi=i; }
+        }
+        if(bi<0) continue;
+        if(s.type==="scatter"||s.type==="bar"){
+          if(bd>26) continue;
+          rows.push([s, bi]); best={x:s.x[bi]};
+        } else {
+          if(s.x[bi] < xlo-1e-12 || s.x[bi] > xhi+1e-12) continue;
+          rows.push([s, bi]);
+          if(!best) best={x:s.x[bi]};
+        }
+      }
+      if(!rows.length){ tipEl.style.opacity=0; return; }
+      // crosshair
+      drawChart._redraw && drawChart._redraw();
+      g.strokeStyle = css("--axis"); g.lineWidth=1; g.setLineDash([3,3]);
+      g.beginPath(); g.moveTo(mx, pad.t); g.lineTo(mx, pad.t+ph); g.stroke();
+      g.setLineDash([]);
+      for(const [s,i] of rows){
+        g.fillStyle=css(s.color); g.strokeStyle=css("--surface-1"); g.lineWidth=2;
+        g.beginPath(); g.arc(sx(s.x[i]), sy(s.y[i]), 4, 0, 6.2832); g.fill(); g.stroke();
+      }
+      const hx = spec.xfmt?spec.xfmt(rows[0][0].x[rows[0][1]]):fmt(rows[0][0].x[rows[0][1]]);
+      tipEl.innerHTML = `<b>${spec.xlab0||spec.xlab||""} ${hx}</b>` +
+        rows.map(([s,i])=>`<div class="r"><span><i style="background:${css(s.color)}"></i>${
+          s.name||""}</span><span>${spec.tipfmt?spec.tipfmt(s.y[i],s):fmt(s.y[i])}</span></div>`).join("");
+      tipEl.style.opacity=1;
+      const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+      tipEl.style.left = Math.min(Math.max(mx+14, 4), W-tw-4)+"px";
+      tipEl.style.top  = Math.min(Math.max(my-th-10, 4), Hh-th-4)+"px";
+    };
+    canvas.onpointermove = onMove;
+    canvas.onpointerleave = ()=>{ tipEl.style.opacity=0; redraw(); };
+    const redraw = ()=>drawChart(canvas, null, null, spec);
+    drawChart._redraw = redraw;
+  }
+}
+
+/* =====================================================================
+   UI
+   ===================================================================== */
+const P = Object.assign({}, DEFAULTS);
+const el = id=>document.getElementById(id);
+
+function buildPanel(){
+  const host = el("panel"); host.innerHTML = "";
+  for(const [title, open, items] of GROUPS){
+    const d = document.createElement("details");
+    d.className = "grp"; d.open = open;
+    d.innerHTML = `<summary>${title}</summary><div class="body"></div>`;
+    const body = d.querySelector(".body");
+    if(title.startsWith("Burning")){
+      const w = document.createElement("div");
+      w.className="ctl";
+      w.innerHTML = `<div class="lab"><span class="nm">Grain geometry preset</span></div>`;
+      const sel = document.createElement("select");
+      sel.innerHTML = Object.entries(FORMS).map(([k,v])=>
+        `<option value="${k}">${v.label}</option>`).join("");
+      sel.value = P.form;
+      sel.onchange = ()=>{ P.form = sel.value;
+        if(sel.value!=="custom"){ P.lam = FORMS[sel.value].lam; syncPanel(); }
+        run(); };
+      w.appendChild(sel);
+      body.appendChild(w);
+    }
+    for(const [key,label,min,max,step,unit,fmtv] of items){
+      const c = document.createElement("div"); c.className = "ctl";
+      c.innerHTML =
+        `<div class="lab"><span class="nm">${label}</span><span class="val" id="v_${key}"></span></div>`;
+      const r = document.createElement("input");
+      r.type="range"; r.min=min; r.max=max; r.step=step; r.value=P[key]; r.id="r_"+key;
+      r.oninput = ()=>{
+        P[key] = +r.value;
+        if(key==="lam"){ P.form="custom"; const s=host.querySelector("select"); if(s) s.value="custom"; }
+        el("v_"+key).textContent = fmtv(P[key]);
+        run();
+      };
+      c.appendChild(r);
+      body.appendChild(c);
+      c._fmt = fmtv;
+    }
+    host.appendChild(d);
+  }
+  syncPanel();
+}
+function syncPanel(){
+  for(const [,,items] of GROUPS) for(const [key,,,,,,fmtv] of items){
+    const r = el("r_"+key), v = el("v_"+key);
+    if(r){ r.value = P[key]; }
+    if(v){ v.textContent = fmtv(P[key]); }
+  }
+}
+
+/* comparison barrel lengths */
+let compare = [10.5, 14.5, 20];
+const COMPARE_OPTIONS = [7, 10.3, 10.5, 11.5, 12.5, 14.5, 16, 18, 20, 24];
+function buildChips(){
+  const host = el("chips");
+  host.querySelectorAll(".chip").forEach(n=>n.remove());
+  COMPARE_OPTIONS.forEach((L,i)=>{
+    const b = document.createElement("button");
+    b.className="chip"; b.textContent = L;
+    const on = compare.includes(L);
+    b.setAttribute("aria-pressed", on);
+    const col = css(SERIES[compare.indexOf(L)%8]);
+    if(on){ b.style.background = col; b.style.color="#fff"; }
+    b.onclick = ()=>{
+      if(compare.includes(L)) compare = compare.filter(x=>x!==L);
+      else if(compare.length<5) compare = [...compare, L].sort((a,b)=>a-b);
+      buildChips(); run();
+    };
+    host.appendChild(b);
+  });
+}
+
+/* ---------- caches ---------- */
+function runOne(overrides){
+  return simulate(build(Object.assign({}, P, overrides||{})));
+}
+
+let LAST = null;
+function run(){
+  const c = build(P);
+  const r = simulate(c);
+  const E = energyBudget(c,r);
+  LAST = {c,r,E};
+
+  /* --- warnings --- */
+  const w = [];
+  if(c.pack > 0.72) w.push(`Loading density ${(c.dens).toFixed(0)} kg/m³ gives a solid packing fraction of ${(c.pack*100).toFixed(0)} % — above about 65 % the charge will not physically fit in the case.`);
+  if(c.travel <= 0) w.push("Barrel is shorter than the seated bullet position — no travel.");
+  if(r.peak > 500e6) w.push(`Peak breech pressure ${(r.peak/1e6).toFixed(0)} MPa (${(r.peak/PSI/1000).toFixed(0)} kpsi) is far above the 430 MPa NATO EPVAT limit — this would be a catastrophic overpressure.`);
+  if(Math.abs(E.closure) > 0.02) w.push(`Energy closure error ${(E.closure*100).toFixed(1)} % — reduce the time step.`);
+  if(P.x_port*IN > c.L_bbl) w.push("Gas port is beyond the muzzle.");
+  el("warn").innerHTML = w.length
+    ? `<div class="msg ${r.peak>500e6?"bad":""}">${w.join("<br>")}</div>` : "";
+
+  /* --- tiles --- */
+  const ME = 0.5*c.m_b*r.v*r.v;
+  el("tiles").innerHTML = [
+    ["Muzzle velocity", r.v.toFixed(1), "m/s", `${(r.v/FPS).toFixed(0)} ft/s`, true],
+    ["Muzzle pressure (bullet base)", (r.pBase/1e6).toFixed(1), "MPa",
+      `${(r.pBase/PSI).toFixed(0)} psi · breech ${(r.pBreech/1e6).toFixed(1)} MPa`, true],
+    ["Peak breech pressure", (r.peak/1e6).toFixed(0), "MPa",
+      `${(r.peak/PSI/1000).toFixed(1)} kpsi at t = ${(r.tPeak*1e3).toFixed(3)} ms`],
+    ["Muzzle-exit time", (r.tExit*1e3).toFixed(3), "ms",
+      `bullet travel ${(r.x*1e3).toFixed(1)} mm`],
+    ["Charge burnt at exit", (r.psi*100).toFixed(1), "%",
+      r.psi>0.999?"complete combustion in bore":`${((1-r.psi)*P.m_c_gr).toFixed(2)} gr ejected unburnt`],
+    ["Muzzle energy", ME.toFixed(0), "J", `${(ME*0.737562).toFixed(0)} ft·lbf`],
+    ["Gas-port pressure at exit", (r.portExit/PSI/1000).toFixed(1), "kpsi",
+      `peak ${(r.portPeak/PSI/1000).toFixed(1)} kpsi · port at ${P.x_port.toFixed(2)} in`],
+    ["Peak acceleration", (r.aMax/9.80665/1000).toFixed(0), "×1000 g",
+      `${(r.aMax/1e6).toFixed(2)}e6 m/s²`]
+  ].map(([k,v,u,alt,hi])=>
+    `<div class="tile${hi?" hi":""}"><div class="k">${k}</div><div class="v">${v}<span class="u">${u}</span></div><div class="alt">${alt}</div></div>`
+  ).join("");
+
+  /* --- overlay runs --- */
+  const runs = compare.map((L,i)=>({
+    L, color: SERIES[i%8], r: runOne({L_bbl:L})
+  }));
+
+  const H = r.H;
+  const ms = a=>a.map(v=>v*1e3), MPa = a=>a.map(v=>v/1e6), mm = a=>a.map(v=>v*1e3);
+
+  drawChart(el("cPt"), el("tPt"), el("lPt"), {
+    xlab:"time (ms)", ylab:"pressure (MPa)", xlab0:"t =",
+    tipfmt:v=>v.toFixed(1)+" MPa",
+    series:[
+      {name:"breech", color:"--s1", x:ms(H.t), y:MPa(H.pb)},
+      {name:"space-mean", color:"--s2", x:ms(H.t), y:MPa(H.p)},
+      {name:"bullet base", color:"--s3", x:ms(H.t), y:MPa(H.pa)},
+      {name:"gas port", color:"--s4", x:ms(H.t), y:MPa(H.pp), dash:[5,3]}
+    ]});
+
+  drawChart(el("cPtL"), el("tPtL"), el("lPtL"), {
+    reverseDraw:true, xlab:"time (ms)", ylab:"bullet-base pressure (MPa)", xlab0:"t =",
+    tipfmt:v=>v.toFixed(1)+" MPa",
+    series: runs.map(d=>({name:`${d.L} in`, color:d.color,
+      x:ms(d.r.H.t), y:MPa(d.r.H.pa), endDot:true}))});
+
+  drawChart(el("cPx"), el("tPx"), el("lPx"), {
+    reverseDraw:true, xlab:"bullet travel (mm)", ylab:"bullet-base pressure (MPa)", xlab0:"x =",
+    tipfmt:v=>v.toFixed(1)+" MPa",
+    series: runs.map(d=>({name:`${d.L} in`, color:d.color,
+      x:mm(d.r.H.x), y:MPa(d.r.H.pa), endDot:true}))});
+
+  drawChart(el("cVt"), el("tVt"), el("lVt"), {
+    reverseDraw:true, xlab:"time (ms)", ylab:"velocity (m/s)", xlab0:"t =",
+    tipfmt:v=>v.toFixed(0)+" m/s",
+    series: runs.map(d=>({name:`${d.L} in`, color:d.color,
+      x:ms(d.r.H.t), y:d.r.H.v.slice(), endDot:true}))});
+
+  drawChart(el("cXt"), el("tXt"), el("lXt"), {
+    reverseDraw:true, xlab:"time (ms)", ylab:"travel (mm)", xlab0:"t =",
+    tipfmt:v=>v.toFixed(1)+" mm",
+    series: runs.map(d=>({name:`${d.L} in`, color:d.color,
+      x:ms(d.r.H.t), y:mm(d.r.H.x), endDot:true}))});
+
+  drawChart(el("cPsi"), el("tPsi"), el("lPsi"), {
+    xlab:"time (ms)", ylab:"fraction (—)", xlab0:"t =",
+    tipfmt:v=>v.toFixed(4),
+    series:[
+      {name:"burnt mass fraction ψ", color:"--s1", x:ms(H.t), y:H.psi.slice()},
+      {name:"web burnt fraction z", color:"--s3", x:ms(H.t), y:H.z.slice(), dash:[5,3]}
+    ]});
+
+  drawChart(el("cT"), el("tT"), el("lT"), {
+    xlab:"time (ms)", ylab:"gas temperature (K)", xlab0:"t =",
+    tipfmt:v=>v.toFixed(0)+" K",
+    series:[{name:"mean gas temperature", color:"--s2", x:ms(H.t), y:H.T.slice()}]});
+
+  drawSweep();
+  drawEnergy(c,r,E);
+  drawTables(c,r);
+}
+
+/* ---------- sweep tab ---------- */
+let SWEEP = [];
+function drawSweep(){
+  const lo = 5, hi = 26, N = 43;
+  SWEEP = [];
+  for(let i=0;i<N;i++){
+    const L = lo + (hi-lo)*i/(N-1);
+    const rr = runOne({L_bbl:L, x_port:Math.min(P.x_port, L-1)});
+    SWEEP.push({L, v:rr.v, pBase:rr.pBase, pMean:rr.pMean, peak:rr.peak,
+                t:rr.tExit, psi:rr.psi, E:0.5*build(P).m_b*rr.v*rr.v});
+  }
+  const Ls = SWEEP.map(d=>d.L);
+  const gain = SWEEP.map((d,i)=> i===0?null:(SWEEP[i].v-SWEEP[i-1].v)/(Ls[i]-Ls[i-1])/FPS)
+                    .map(v=>v===null?NaN:v);
+
+  drawChart(el("sV"), el("tsV"), el("lsV"), {
+    xlab:"barrel length from bolt face (in)", ylab:"muzzle velocity (m/s)", xlab0:"L =",
+    tipfmt:v=>v.toFixed(0)+" m/s", height:270,
+    series:[
+      {name:"model", color:"--s1", x:Ls, y:SWEEP.map(d=>d.v)},
+      {name:"Lucky Gunner (M855)", color:"--s2", type:"scatter",
+       x:VEL_DATA.filter(d=>d.src.startsWith("Lucky")).map(d=>d.L),
+       y:VEL_DATA.filter(d=>d.src.startsWith("Lucky")).map(d=>d.fps*FPS)},
+      {name:"SADJ / Watters", color:"--s3", type:"scatter",
+       x:VEL_DATA.filter(d=>d.src.startsWith("SADJ")).map(d=>d.L),
+       y:VEL_DATA.filter(d=>d.src.startsWith("SADJ")).map(d=>d.fps*FPS)},
+      {name:"TFB", color:"--s4", type:"scatter",
+       x:VEL_DATA.filter(d=>d.src==="TFB").map(d=>d.L),
+       y:VEL_DATA.filter(d=>d.src==="TFB").map(d=>d.fps*FPS)}
+    ]});
+
+  drawChart(el("sP"), el("tsP"), el("lsP"), {
+    xlab:"barrel length from bolt face (in)", ylab:"pressure at bullet exit (MPa)",
+    xlab0:"L =", tipfmt:v=>v.toFixed(1)+" MPa", height:270,
+    series:[
+      {name:"model, bullet base", color:"--s1", x:Ls, y:SWEEP.map(d=>d.pBase/1e6)},
+      {name:"model, space-mean", color:"--s2", x:Ls, y:SWEEP.map(d=>d.pMean/1e6), dash:[5,3]},
+      {name:"SADJ measured uncorking", color:"--s3", type:"scatter",
+       x:PMUZ_DATA.map(d=>d.L), y:PMUZ_DATA.map(d=>d.psi*PSI/1e6)}
+    ]});
+
+  drawChart(el("sG"), el("tsG"), el("lsG"), {
+    xlab:"barrel length from bolt face (in)", ylab:"muzzle energy (J)",
+    xlab0:"L =", tipfmt:v=>v.toFixed(0)+" J", height:270,
+    series:[{name:"muzzle energy", color:"--s1", x:Ls, y:SWEEP.map(d=>d.E)}]});
+
+  drawChart(el("sB"), el("tsB"), el("lsB"), {
+    xlab:"barrel length from bolt face (in)", ylab:"burnt fraction ψ at exit (—)",
+    xlab0:"L =", tipfmt:v=>v.toFixed(4), height:270,
+    series:[{name:"burnt fraction ψ at exit", color:"--s1", x:Ls, y:SWEEP.map(d=>d.psi)}]});
+
+  drawChart(el("sT"), el("tsT"), el("lsT"), {
+    xlab:"barrel length from bolt face (in)", ylab:"muzzle-exit time (ms)",
+    xlab0:"L =", tipfmt:v=>v.toFixed(3)+" ms", height:270,
+    series:[{name:"muzzle-exit time", color:"--s2", x:Ls, y:SWEEP.map(d=>d.t*1e3)}]});
+
+  drawChart(el("sD"), el("tsD"), el("lsD"), {
+    xlab:"barrel length from bolt face (in)", ylab:"velocity gain (ft/s per inch)",
+    xlab0:"L =", tipfmt:v=>v.toFixed(1)+" ft/s per in", height:270,
+    series:[{name:"marginal velocity gain", color:"--s3", x:Ls.slice(1), y:gain.slice(1)}]});
+
+  const cur = build(P);
+  const i20 = SWEEP.reduce((b,d,i)=>Math.abs(d.L-20)<Math.abs(SWEEP[b].L-20)?i:b,0);
+  const i105 = SWEEP.reduce((b,d,i)=>Math.abs(d.L-10.5)<Math.abs(SWEEP[b].L-10.5)?i:b,0);
+  el("sweepnote").innerHTML =
+    `Going from ${SWEEP[i105].L.toFixed(1)} in to ${SWEEP[i20].L.toFixed(1)} in: ` +
+    `muzzle velocity <b>+${(SWEEP[i20].v-SWEEP[i105].v).toFixed(0)} m/s</b> ` +
+    `(+${((SWEEP[i20].v/SWEEP[i105].v-1)*100).toFixed(1)} %), while the pressure remaining ` +
+    `behind the bullet at exit falls from <b>${(SWEEP[i105].pBase/1e6).toFixed(0)} MPa</b> ` +
+    `to <b>${(SWEEP[i20].pBase/1e6).toFixed(0)} MPa</b> ` +
+    `(&minus;${(100-100*SWEEP[i20].pBase/SWEEP[i105].pBase).toFixed(0)} %). ` +
+    `Muzzle pressure falls far faster than velocity rises — that asymmetry is why ` +
+    `short barrels are loud and flashy but only modestly slower.`;
+}
+
+/* ---------- energy tab ---------- */
+function drawEnergy(c,r,E){
+  const items = [
+    ["bullet KE", E.kinetic, "--s1"],
+    ["gas KE", E.gasKin, "--s3"],
+    ["bore friction", E.friction, "--s4"],
+    ["gas internal energy at exit", E.internal, "--s2"],
+    ["heat to walls", E.heat, "--s8"],
+    ["unburnt propellant", E.unburnt, "--s7"]
+  ];
+  const canvas = el("eBar"), tip = el("teBar");
+  const dpr = window.devicePixelRatio||1, W = canvas.clientWidth||420, Hh = 270;
+  canvas.width=W*dpr; canvas.height=Hh*dpr; canvas.style.height=Hh+"px";
+  const g = canvas.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,Hh);
+  const pad={l:10,r:10,t:10,b:64}, pw=W-pad.l-pad.r, ph=Hh-pad.t-pad.b;
+  const max = Math.max(...items.map(d=>d[1]), 1) * 1.14;
+  const bw = pw/items.length, iw = Math.min(52, bw*0.62);
+  g.font="11px system-ui,sans-serif";
+  items.forEach(([k,v,col],i)=>{
+    const cx = pad.l + bw*(i+0.5);
+    const h = Math.max(2, v/max*ph), y = pad.t+ph-h;
+    g.fillStyle = css(col);
+    const rr = Math.min(4,h/2,iw/2);
+    g.beginPath();
+    g.moveTo(cx-iw/2, y+h); g.lineTo(cx-iw/2, y+rr);
+    g.quadraticCurveTo(cx-iw/2, y, cx-iw/2+rr, y);
+    g.lineTo(cx+iw/2-rr, y); g.quadraticCurveTo(cx+iw/2, y, cx+iw/2, y+rr);
+    g.lineTo(cx+iw/2, y+h); g.closePath(); g.fill();
+    g.fillStyle=css("--text-primary"); g.textAlign="center"; g.textBaseline="bottom";
+    g.font="600 11.5px system-ui,sans-serif";
+    g.fillText(`${(100*v/E.chem).toFixed(1)} %`, cx, y-4);
+    g.font="11px system-ui,sans-serif"; g.fillStyle=css("--text-secondary");
+    const words = k.split(" ");
+    let line="", ln=0;
+    for(const wd of words){
+      if((line+" "+wd).trim().length>13){ g.fillText(line, cx, pad.t+ph+16+ln*13); line=wd; ln++; }
+      else line = (line+" "+wd).trim();
+    }
+    g.fillText(line, cx, pad.t+ph+16+ln*13);
+    g.fillStyle=css("--muted");
+    g.fillText(`${v.toFixed(0)} J`, cx, pad.t+ph+16+(ln+1)*13);
+  });
+  g.strokeStyle=css("--axis"); g.beginPath();
+  g.moveTo(pad.l, pad.t+ph+0.5); g.lineTo(W-pad.r, pad.t+ph+0.5); g.stroke();
+  el("leBar").innerHTML =
+    `<span>Total chemical energy of the charge <b>${E.chem.toFixed(0)} J</b></span>` +
+    `<span>closure error ${(E.closure*100).toFixed(2)} %</span>`;
+  tip.style.opacity=0;
+
+  const H=r.H;
+  drawChart(el("ePort"), el("tePort"), el("lePort"), {
+    xlab:"time (ms)", ylab:"pressure (MPa)", xlab0:"t =",
+    tipfmt:v=>v.toFixed(1)+" MPa", height:270,
+    series:[
+      {name:"gas-port station", color:"--s4", x:H.t.map(v=>v*1e3), y:H.pp.map(v=>v/1e6)},
+      {name:"breech", color:"--s1", x:H.t.map(v=>v*1e3), y:H.pb.map(v=>v/1e6), dash:[5,3]}
+    ]});
+
+  el("tiles2").innerHTML = [
+    ["Loading density", (c.dens).toFixed(0), "kg/m³",
+      `solid packing ${(c.pack*100).toFixed(1)} %`],
+    ["Charge-to-bullet ratio ζ", c.zeta.toFixed(3), "", `φ = ${c.phi.toFixed(3)}`],
+    ["Reduced chamber length L₀", (c.L0*1e3).toFixed(1), "mm", `V₀/A`],
+    ["Expansion ratio", ((c.V0+c.A*r.x)/c.V0).toFixed(2), "", "V_muzzle / V₀"],
+    ["Gas temperature at exit", r.T.toFixed(0), "K", `flame temp ${c.T_v.toFixed(0)} K`],
+    ["Thermal efficiency", (100*E.kinetic/E.chem).toFixed(1), "%",
+      "bullet KE / chemical energy"],
+    ["Breech/base pressure ratio", (1+c.zeta/2).toFixed(3), "",
+      `Lagrange, ζ = ${c.zeta.toFixed(3)}`],
+    ["Impulse on bullet", (c.m_b*r.v).toFixed(2), "N·s", "m_b · v_muzzle"]
+  ].map(([k,v,u,alt])=>
+    `<div class="tile"><div class="k">${k}</div><div class="v">${v}<span class="u">${u}</span></div><div class="alt">${alt}</div></div>`
+  ).join("");
+
+  // convergence check
+  const rHalf = simulate(build(Object.assign({},P,{dt:P.dt/2})));
+  const dv = Math.abs(rHalf.v-r.v), dp = Math.abs(rHalf.pBase-r.pBase)/1e6;
+  el("conv").innerHTML =
+    `Halving the time step (Δt = ${(P.dt/2).toFixed(3)} µs) changes the muzzle velocity by ` +
+    `<b>${dv.toFixed(3)} m/s</b> (${(100*dv/r.v).toFixed(4)} %) and the muzzle pressure by ` +
+    `<b>${dp.toFixed(3)} MPa</b> (${(100*dp/(r.pBase/1e6)).toFixed(3)} %). ` +
+    `RK4 is fourth-order, so halving Δt should cut the error by ~16×. ` +
+    `Energy closure error at the current step is ${(LAST.E.closure*100).toFixed(3)} %.`;
+}
+
+/* ---------- table tab ---------- */
+function drawTables(c,r){
+  let h = `<thead><tr><th>L (in)</th><th>L (mm)</th><th>v (m/s)</th><th>v (ft/s)</th>
+    <th>p base (MPa)</th><th>p base (psi)</th><th>p mean (MPa)</th><th>p peak (MPa)</th>
+    <th>t exit (ms)</th><th>ψ exit</th><th>E (J)</th></tr></thead><tbody>`;
+  for(const d of SWEEP){
+    h += `<tr><td>${d.L.toFixed(1)}</td><td>${(d.L*25.4).toFixed(0)}</td>
+      <td>${d.v.toFixed(1)}</td><td>${(d.v/FPS).toFixed(0)}</td>
+      <td>${(d.pBase/1e6).toFixed(1)}</td><td>${(d.pBase/PSI).toFixed(0)}</td>
+      <td>${(d.pMean/1e6).toFixed(1)}</td><td>${(d.peak/1e6).toFixed(1)}</td>
+      <td>${(d.t*1e3).toFixed(3)}</td><td>${d.psi.toFixed(4)}</td>
+      <td>${d.E.toFixed(0)}</td></tr>`;
+  }
+  el("tblSweep").innerHTML = h + "</tbody>";
+
+  const H = r.H, step = Math.max(1, Math.floor(H.t.length/120));
+  let t = `<thead><tr><th>t (ms)</th><th>x (mm)</th><th>v (m/s)</th>
+    <th>p breech (MPa)</th><th>p mean (MPa)</th><th>p base (MPa)</th>
+    <th>p port (MPa)</th><th>ψ</th><th>T (K)</th></tr></thead><tbody>`;
+  for(let i=0;i<H.t.length;i+=step){
+    t += `<tr><td>${(H.t[i]*1e3).toFixed(4)}</td><td>${(H.x[i]*1e3).toFixed(2)}</td>
+      <td>${H.v[i].toFixed(1)}</td><td>${(H.pb[i]/1e6).toFixed(2)}</td>
+      <td>${(H.p[i]/1e6).toFixed(2)}</td><td>${(H.pa[i]/1e6).toFixed(2)}</td>
+      <td>${isFinite(H.pp[i])?(H.pp[i]/1e6).toFixed(2):"—"}</td><td>${H.psi[i].toFixed(4)}</td>
+      <td>${H.T[i].toFixed(0)}</td></tr>`;
+  }
+  el("tblHist").innerHTML = t + "</tbody>";
+}
+
+/* ---------- wiring ---------- */
+el("theme").onclick = ()=>{
+  const cur = document.documentElement.getAttribute("data-theme");
+  document.documentElement.setAttribute("data-theme", cur==="dark"?"light":"dark");
+  buildChips(); run();
+};
+el("reset").onclick = ()=>{ Object.assign(P, DEFAULTS); syncPanel();
+  const s = el("panel").querySelector("select"); if(s) s.value=P.form; run(); };
+el("csv").onclick = ()=>{
+  const H = LAST.r.H;
+  let s = "t_s,x_m,v_ms,p_mean_Pa,p_breech_Pa,p_base_Pa,p_port_Pa,psi,z,T_K\n";
+  for(let i=0;i<H.t.length;i++)
+    s += [H.t[i],H.x[i],H.v[i],H.p[i],H.pb[i],H.pa[i],H.pp[i],H.psi[i],H.z[i],H.T[i]]
+         .map(v=>isFinite(v)?v.toPrecision(8):"").join(",")+"\n";
+  s += "\n# barrel sweep\nL_in,v_ms,p_base_Pa,p_mean_Pa,p_peak_Pa,t_exit_s,psi_exit\n";
+  for(const d of SWEEP)
+    s += [d.L,d.v,d.pBase,d.pMean,d.peak,d.t,d.psi].map(v=>(+v).toPrecision(8)).join(",")+"\n";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([s],{type:"text/csv"}));
+  a.download = `ballistics_${P.L_bbl}in.csv`; a.click();
+};
+const sel = el("preset");
+sel.innerHTML = Object.keys(PRESETS).map(k=>`<option>${k}</option>`).join("");
+sel.onchange = ()=>{
+  Object.assign(P, DEFAULTS, PRESETS[sel.value]);
+  syncPanel();
+  const s = el("panel").querySelector("select"); if(s) s.value=P.form;
+  run();
+};
+document.querySelectorAll('[role=tab]').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('[role=tab]').forEach(x=>x.setAttribute("aria-selected", x===b));
+    for(const t of ["shot","sweep","energy","table"])
+      el("tab-"+t).hidden = (t !== b.dataset.tab);
+    run();
+  };
+});
+let rt; window.addEventListener("resize", ()=>{ clearTimeout(rt); rt=setTimeout(run,120); });
+
+buildPanel();
+buildChips();
+run();
+</script>
+</body>
+</html>
