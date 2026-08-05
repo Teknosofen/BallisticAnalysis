@@ -99,6 +99,7 @@ function figure(file, caption, widthIn) {
     'fig5_muzzle_pressure.png': [6.4, 3.5], 'fig6_burnt_time.png': [6.9, 2.9],
     'fig7_energy.png': [6.4, 3.2], 'fig8_form.png': [6.4, 3.0],
     'fig9_velocity_summary.png': [6.6, 3.9],
+    'fig10_noise_distance.png': [6.4, 3.6], 'fig11_noise_barrel.png': [6.4, 3.6],
     'screen_shot.png': [16, 11], 'screen_sweep.png': [16, 13.49] };
   const key = file.split('/').pop();
   const ar = dims[key] ? dims[key][1] / dims[key][0] : 0.55;
@@ -161,10 +162,13 @@ P(p([bd('§7–§9  '), tx('a complete, sourced parameter set for the cartridge,
 P(p([bd('§10  '), tx('results: pressure–time and pressure–travel histories, muzzle velocity '
   + 'and muzzle pressure as functions of barrel length from 5 in to 26 in.')],
   { indent: { left: 340 } }));
-P(p([bd('§11  '), tx('an honest account of what this class of model gets wrong, and the '
+P(p([bd('§11  '), tx('an application of the muzzle conditions: how much of the noise of a '
+  + 'shot is the escaping propellant gas and how much is the projectile’s own shock wave, '
+  + 'and what barrel length does to each.')], { indent: { left: 340 } }));
+P(p([bd('§12  '), tx('an honest account of what this class of model gets wrong, and the '
   + 'specific upgrade paths — Lagrange gradient, one-dimensional gas dynamics, two-phase '
   + 'flow — that remove each limitation.')], { indent: { left: 340 } }));
-P(p([bd('§12  '), tx('how to drive the companion HTML simulator.')], { indent: { left: 340 } }));
+P(p([bd('§13  '), tx('how to drive the companion HTML simulator.')], { indent: { left: 340 } }));
 
 P(p([tx('The model is of the classical "lumped-parameter" or "zero-dimensional" class: '
   + 'the same family as the US Army’s IBHVG2 and the interior-ballistics module of '
@@ -244,7 +248,7 @@ P(p([bd('5. Pure adiabatic expansion. '), tx('From then until the muzzle the gas
 
 P(h2('3.1  Assumptions'));
 P(p('The lumped-parameter formulation rests on the following assumptions. Each one is '
-  + 'revisited in §11, where the cost of relaxing it is discussed.'));
+  + 'revisited in §12, where the cost of relaxing it is discussed.'));
 [
   ['A1', 'The propellant gas is spatially uniform in composition and temperature: one gas '
     + 'phase, one temperature, one density, one space-mean pressure.'],
@@ -733,7 +737,7 @@ P(p([tx('The honest conclusion is that the '), bd('trend'),
   tx(' — muzzle pressure rising steeply and non-linearly as the barrel shortens — is '
   + 'robust and is reproduced, but the '), bd('absolute level'),
   tx(' at barrels below about 12 in should be treated as an upper bound with an uncertainty '
-  + 'of roughly a factor of two. Section 11 identifies which modelling upgrade would most '
+  + 'of roughly a factor of two. Section 12 identifies which modelling upgrade would most '
   + 'likely resolve it.')]));
 P(...figure('fig5_muzzle_pressure.png',
   'Figure 3 — Muzzle pressure at bullet exit versus barrel length. The kink near 11.5 in '
@@ -855,7 +859,7 @@ P(p([bd('Velocity. '), tx('From 10.5 in to 20 in the muzzle velocity rises from 
   + 'per inch at 5 in, 60 ft/s per inch at 14.5 in, 21 ft/s per inch at 22 in. Past about '
   + '24 in the curve is nearly flat, and in reality friction eventually wins — the SADJ '
   + 'cut-barrel data show velocity peaking near 20 in and then falling, which this model '
-  + 'does not reproduce because bore resistance is taken as constant (§11.5).')]));
+  + 'does not reproduce because bore resistance is taken as constant (§12.5).')]));
 P(p([bd('Muzzle pressure. '), tx('Over that same change, the pressure behind the bullet at '
   + 'exit falls from 150 MPa to 51 MPa — a reduction of 66 % against a velocity gain of '
   + '18 %. Halving the barrel roughly triples the uncorking pressure. Since muzzle blast '
@@ -878,11 +882,214 @@ P(p([bd('Gas port. '), tx('For a direct-impingement AR the model reports the pre
 
 /* ---------------------------------------------------- 11. limitations ----- */
 P(new Paragraph({ children: [new PageBreak()] }));
-P(h1('11  Model compromises and upgrade paths'));
+P(h1('11  Muzzle noise: blast versus ballistic crack'));
+P(p([tx('The model stops at bullet exit, but the two quantities it delivers there — the '
+  + 'muzzle pressure and the muzzle velocity — are precisely the inputs to the two things '
+  + 'that make a rifle loud. This section is therefore an application of the results in '),
+  bd('§10'), tx(' rather than new interior ballistics, and it answers a question the '
+  + 'barrel-length study raises immediately: a long barrel gives a faster bullet but leaves '
+  + 'less pressure behind it, a short barrel the reverse — which is noisier?')]));
+
+P(h2('11.1  Two sources, two different physics'));
+P(p([bd('Muzzle blast. '), tx('At the instant of uncorking the bore still contains gas at '
+  + 'tens of megapascals and well over a thousand kelvin. When the bullet clears the crown '
+  + 'that gas is released into the atmosphere in well under a millisecond. It is, in every '
+  + 'meaningful sense, a small explosion: a roughly spherical shock centred on the muzzle, '
+  + 'radiating in all directions, decaying as a point source.')]));
+P(p([bd('Ballistic crack. '), tx('The bullet leaves at Mach 2.7 and drags a conical shock '
+  + 'behind it — a Whitham N-wave. This is generated continuously along the whole '
+  + 'trajectory, not at a point, and it is created entirely outside the weapon. It cannot '
+  + 'be suppressed by anything fitted to the muzzle; only a subsonic projectile removes it.')]));
+P(p('The two therefore differ in every respect that matters acoustically: where they are '
+  + 'created, how they radiate, how fast they decay, and whether a suppressor can touch '
+  + 'them. Which one dominates depends entirely on where the listener is standing.'));
+
+P(h2('11.2  Energy released as blast'));
+P(p([tx('The energy budget of §9.3 already gives the answer for the blast. At muzzle exit '
+  + 'from a 20 in barrel the gas still holds '), bd('2 890 J'), tx(' of internal energy — '
+  + '43 % of the entire chemical energy of the charge. The part of that which can do work '
+  + 'on the atmosphere is the isentropic expansion down to ambient pressure, to which the '
+  + 'kinetic energy already carried by the gas column must be added:')]));
+P(eq());
+P(p([tx('with '), ...sub('p', 'm'), tx(' the space-mean pressure at exit and '), ...sub('p', '0'),
+  tx(' atmospheric. Any propellant ejected unburnt is added as well, since it burns in the '
+  + 'muzzle flash rather than in the bore:')]));
+P(table(
+  ['Barrel (in)', 'v_m (m/s)', 'Mach', 'Blast energy (J)', 'TNT equivalent (g)', 'Unburnt charge'],
+  [
+    ['7.0', '665', '1.94', '4 349', '1.04', '21 %'],
+    ['10.5', '789', '2.30', '3 487', '0.83', '2 %'],
+    ['11.5', '815', '2.38', '3 298', '0.79', '0 %'],
+    ['14.5', '872', '2.54', '2 879', '0.69', '0 %'],
+    ['16.0', '891', '2.60', '2 698', '0.64', '0 %'],
+    ['20.0', '928', '2.71', '2 278', '0.54', '0 %'],
+    ['24.0', '951', '2.77', '1 929', '0.46', '0 %'],
+  ],
+  [1700, 1700, 1200, 2100, 2200, 1700], { leftCols: 1 }));
+P(p([tx('So a single 5.56 round from a 20 in barrel dumps roughly '), bd('half a gram of '
+  + 'TNT equivalent'), tx(' into the air in about a millisecond — and from a 10.5 in barrel, '
+  + 'half again as much.')]));
+P(p([tx('For comparison, the projectile deposits energy into the air through drag. At '
+  + '928 m/s with a drag coefficient of about 0.30 referred to the frontal area, the drag '
+  + 'force is 4.0 N and the bullet is dissipating 3.8 kW — that is '), bd('4 joules per '
+  + 'metre of flight'), tx('. Over the first ten metres the bullet contributes some 40 J '
+  + 'against the blast’s 2 280 J, a ratio near 60 : 1. On an energy basis, close to the '
+  + 'weapon, the noise of a rifle is almost entirely escaping gas.')]));
+
+P(h2('11.3  Amplitude of the ballistic crack'));
+P(p([tx('Energy is nevertheless the wrong currency, because the two sources radiate '
+  + 'differently. The crack is described by Whitham’s far-field solution for a slender '
+  + 'supersonic body, in the form used throughout the gunshot-localisation literature:')]));
+P(eq());
+P(p([tx('where '), it('d'), tx(' and '), it('l'), tx(' are the projectile diameter and '
+  + 'length, '), it('r'), tx(' the '), bd('miss distance'), tx(' — the perpendicular '
+  + 'distance from the trajectory — and '), it('M'), tx(' the flight Mach number. For '
+  + 'M855 (d = 5.70 mm, l = 23.0 mm) at Mach 2.71 this gives 990 Pa at 1 m from the '
+  + 'trajectory, a peak level of 154 dB.')]));
+P(p([tx('Two features of this formula matter more than its absolute value. First, '), it('r'),
+  tx(' is the miss distance and nothing else: how far downrange the listener stands is '
+  + 'irrelevant, because the bullet regenerates the wave continuously as it passes. Second, '
+  + 'the Mach-number dependence is an '), bd('eighth root'), tx('. Raising the muzzle '
+  + 'velocity from Mach 2.30 to Mach 2.71 — the whole difference between a 10.5 in and a '
+  + '20 in barrel — changes the crack amplitude by 0.4 dB, which is inaudible.')]));
+P(p([tx('The wave is also strongly directional. It lies on a cone trailing the projectile '
+  + 'with half-angle')]));
+P(eq());
+P(p([tx('which is 21.7° at Mach 2.71 and 25.8° at Mach 2.30. The '), bd('shooter sits at '
+  + 'the apex of that cone'), tx(' and so never receives his own bullet’s N-wave as a '
+  + 'separate arrival. This is the physical reason a suppressor is fully effective for the '
+  + 'person firing even with supersonic ammunition, and why the crack, while it is a hazard '
+  + 'to someone standing near the trajectory, is not a hearing-damage source for the '
+  + 'shooter.')]));
+
+P(h2('11.4  Which one dominates, and where'));
+P(p('The decisive difference is the decay law. A point source spreads over a sphere; a '
+  + 'moving line source does not:'));
+P(eq());
+P(p([tx('with '), it('R'), tx(' the distance from the muzzle and '), it('r'), tx(' the miss '
+  + 'distance from the trajectory. The blast starts far louder and falls away faster; the '
+  + 'crack starts weaker and is far more persistent.')]));
+P(p([tx('Absolute blast levels here are '), bd('not'), tx(' computed from ideal blast '
+  + 'scaling. Applying Brode’s free-air relation to the source energies of §11.2 '
+  + 'overpredicts the measured level at 1 m by about 9 dB, which is expected: a gun muzzle '
+  + 'is a directed gas jet with a bore-shaped nozzle, not a point explosion, and much of '
+  + 'the energy goes into forward-directed flow rather than a spherical shock. The blast '
+  + 'curve is therefore anchored to a measurement — 162.5 dB peak at 1 m to the side of an '
+  + 'AR-15 in .223 — and scaled from there as the square root of the source energy. The '
+  + 'crack is left as computed, since it needs no such correction.')]));
+P(table(
+  ['Distance (m)', 'Muzzle blast (Pa)', '(dB)', 'Ballistic crack (Pa)', '(dB)', 'Ratio'],
+  [
+    ['1', '2 667', '162.5', '990', '153.9', '2.7 ×'],
+    ['2', '1 334', '156.5', '589', '149.4', '2.3 ×'],
+    ['5', '533', '148.5', '296', '143.4', '1.8 ×'],
+    ['10', '267', '142.5', '176', '138.9', '1.5 ×'],
+    ['25', '107', '134.5', '89', '132.9', '1.2 ×'],
+    ['50', '53', '128.5', '53', '128.4', '1.0 ×'],
+    ['100', '27', '122.5', '31', '123.9', '0.9 ×'],
+  ],
+  [1700, 2100, 1200, 2200, 1200, 1200], { leftCols: 1 }));
+P(...figure('fig10_noise_distance.png',
+  'Figure 10 — The two sound sources, 20 in barrel. Note that the horizontal axis means '
+  + 'different things for the two curves: distance from the muzzle for the blast, '
+  + 'perpendicular miss distance from the trajectory for the crack. The shallower slope of '
+  + 'the crack is the whole story.'));
+P(p([tx('Combining the two geometries — a listener '), it('r'), tx(' metres to the side of '
+  + 'the trajectory and '), it('D'), tx(' metres downrange, for whom the blast has '
+  + 'travelled roughly '), it('D'), tx(' — gives the point at which the crack takes over:')]));
+P(table(
+  ['Miss distance (m)', 'Crack level', 'Crack dominates beyond'],
+  [
+    ['1', '990 Pa · 153.9 dB', '2.5 m downrange'],
+    ['2', '589 Pa · 149.4 dB', '4.1 m downrange'],
+    ['5', '296 Pa · 143.4 dB', '7.5 m downrange'],
+    ['10', '176 Pa · 138.9 dB', '11.4 m downrange'],
+    ['20', '105 Pa · 134.4 dB', '15.8 m downrange'],
+  ],
+  [2600, 3200, 3200], { leftCols: 1 }));
+P(p([bd('At the firing point the noise is essentially all blast'), tx(' — the shooter is a '
+  + 'metre from the source and behind the Mach cone. '), bd('Anywhere near the trajectory '
+  + 'more than about ten metres downrange it is essentially all crack.'), tx(' That is the '
+  + 'familiar crack-thump of being shot at: the N-wave arrives first and sharp, the muzzle '
+  + 'blast follows as a duller thump a moment later, and the delay between them is what '
+  + 'acoustic sniper-location systems exploit to find the shooter.')]));
+P(p([tx('An independent check is available. Larson Davis report a suppressed .223 M855 '
+  + 'round measured at 148.5 dB from a microphone 55 yards downrange — with the blast '
+  + 'suppressed, that reading is essentially pure crack. Equation (24) returns 148.5 dB at '
+  + 'a miss distance of 2.3 m, a plausible microphone offset for such a setup. The crack '
+  + 'model is therefore consistent with measurement without having been fitted to it.')]));
+
+P(h2('11.5  The effect of barrel length'));
+P(p('Now the question that prompted this section. A short barrel gives a slower bullet but '
+  + 'a much higher uncorking pressure; a long barrel the reverse. Which wins?'));
+P(table(
+  ['Barrel (in)', 'v_m (m/s)', 'Blast energy (J)', 'Blast at 1 m (dB)',
+   'Crack at 1 m (dB)', 'Blast at the ear (dB)'],
+  [
+    ['7.0', '665', '4 349', '165.3', '153.0', '169.5'],
+    ['10.5', '789', '3 487', '164.3', '153.5', '167.3'],
+    ['11.5', '815', '3 298', '164.1', '153.6', '166.8'],
+    ['14.5', '872', '2 879', '163.5', '153.7', '165.3'],
+    ['16.0', '891', '2 698', '163.2', '153.8', '164.7'],
+    ['18.0', '912', '2 478', '162.9', '153.8', '163.8'],
+    ['20.0', '928', '2 278', '162.5', '153.9', '162.9'],
+    ['24.0', '951', '1 929', '161.8', '154.0', '161.3'],
+  ],
+  [1500, 1500, 2000, 1900, 1800, 2100], { leftCols: 1 }));
+P(...figure('fig11_noise_barrel.png',
+  'Figure 11 — Peak sound level against barrel length. The blast falls steadily as the '
+  + 'barrel lengthens; the crack is almost perfectly flat because it depends on Mach number '
+  + 'only through an eighth root. The "at the ear" curve is steeper than the fixed-station '
+  + 'curve because a shorter barrel also puts the muzzle closer to the shooter’s head.'));
+P(p([tx('Taking 10.5 in against 20 in at the shooter’s ear, the '), bd('+4.4 dB'),
+  tx(' difference decomposes into two contributions of comparable size:')]));
+P(p([bd('+1.85 dB from energy. '), tx('The short barrel leaves 3 487 J in the gas against '
+  + '2 278 J — 53 % more energy released as blast, because the pressure at uncorking is '
+  + 'three times higher.')], { indent: { left: 340 } }));
+P(p([bd('+2.55 dB from geometry. '), tx('This is the term that is usually overlooked. '
+  + 'Shortening the barrel by 9.5 in moves the muzzle 24 cm closer to the shooter’s ear — '
+  + '71 cm instead of 95 cm — and inverse-distance spreading does the rest. Cutting the '
+  + 'barrel makes the weapon louder partly by moving the explosion nearer your head.')],
+  { indent: { left: 340 } }));
+P(p([tx('Against this, the crack changes by '), bd('−0.4 dB'), tx(' — the long barrel’s '
+  + 'faster bullet is very slightly the noisier of the two in that channel, by an amount no '
+  + 'one could hear.')]));
+P(p([bd('The conclusion is unusually clean: the longer barrel is both faster and quieter.'),
+  tx(' There is no acoustic price for the extra velocity. This is the same asymmetry '
+  + 'identified in §10.3 — muzzle pressure collapses far faster than muzzle velocity rises '
+  + '— seen from the acoustic side. Barrel length is not a noise-against-performance '
+  + 'trade at all; what is actually being traded is handling, weight and manoeuvrability.')]));
+
+P(h2('11.6  Limitations of this estimate'));
+P(p([bd('Peak overpressure is not perceived loudness. '), tx('Everything above is free-field '
+  + 'peak pressure. Hearing-damage risk and subjective loudness also depend on the impulse '
+  + 'and on the spectrum, and a short barrel’s blast has a faster rise time and more '
+  + 'high-frequency content. Impulse-weighted metrics penalise it more than the +4.4 dB '
+  + 'peak difference suggests.')]));
+P(p([bd('Secondary combustion below about 11.5 in. '), tx('The model says the charge is not '
+  + 'fully consumed in barrels shorter than 11.5 in — 21 % remains at 7 in. That propellant '
+  + 'burns outside the muzzle, and PEW Science report exactly this as a measurable '),
+  it('secondary'), tx(' blast wave from short 5.56 barrels, adding early-time positive-phase '
+  + 'impulse that a single peak figure does not capture. The 7 in entry in the table above '
+  + 'should be read as a lower bound.')]));
+P(p([bd('No muzzle devices. '), tx('None of this includes a brake, flash hider or '
+  + 'suppressor. A brake redirects blast rearward and can add 5–10 dB at the shooter’s ear '
+  + '— easily swamping the entire barrel-length effect. A suppressor removes most of the '
+  + 'blast and none of the crack, which is why suppressed supersonic fire still produces a '
+  + 'loud downrange signature.')]));
+P(p([bd('The blast level is calibrated, not predicted. '), tx('As stated in §11.4, the '
+  + 'absolute blast level rests on a published measurement because ideal blast scaling is '
+  + 'not applicable to a directed muzzle jet. The '), bd('relative'), tx(' comparisons — '
+  + 'between barrel lengths, and between blast and crack — are considerably more '
+  + 'trustworthy than the absolute decibel figures, since they depend only on the source '
+  + 'energies the interior-ballistics model computes and on the two decay laws.')]));
+
+P(new Paragraph({ children: [new PageBreak()] }));
+P(h1('12  Model compromises and upgrade paths'));
 P(p('This section states what the lumped-parameter formulation gives up, and what the next '
   + 'model up the ladder would buy. They are ordered by cost.'));
 
-P(h2('11.1  What the lumped model assumes away'));
+P(h2('12.1  What the lumped model assumes away'));
 P(p([bd('No wave dynamics. '), tx('Assumption A1 replaces a compressible gas column with a '
   + 'single control volume. Real ignition is not simultaneous: the primer jet ignites the '
   + 'rear of the charge first and a combustion front sweeps forward, generating pressure '
@@ -909,7 +1116,7 @@ P(p([bd('No leakage, no bullet dynamics. '), tx('Assumption A9 ignores blow-by p
   + 'delivered impulse slightly and, importantly, both would tend to lower the computed '
   + 'muzzle pressure — a candidate explanation for the short-barrel discrepancy in §9.2.')]));
 
-P(h2('11.2  Level 1.5 — the Lagrange gradient (already included)'));
+P(h2('12.2  Level 1.5 — the Lagrange gradient (already included)'));
 P(p([tx('The cheapest possible improvement over a strictly uniform-pressure model is the '
   + 'Lagrange gradient of §4.6, and it is included here because it costs three lines of '
   + 'algebra and no computation at all. It converts a single pressure into a physically '
@@ -922,7 +1129,7 @@ P(p([bd('What it still cannot do: '), tx('the Lagrange profile is a quasi-steady
   + 'column, which is poor while the charge is still burning and gas is being created '
   + 'preferentially where the grains are.')]));
 
-P(h2('11.3  Level 2 — one-dimensional gas dynamics'));
+P(h2('12.3  Level 2 — one-dimensional gas dynamics'));
 P(p([tx('The next step replaces the control volume with the one-dimensional Euler equations '
   + 'for the gas column, solved on a moving mesh between the breech face and the bullet base '
   + 'with a shock-capturing scheme. Mass, momentum and energy are conserved locally, with '
@@ -935,7 +1142,7 @@ P(p([bd('What it costs: '), tx('roughly three orders of magnitude more computati
   + 'present model, and it introduces mesh and scheme dependence that must itself be '
   + 'verified. It would not run interactively in a browser.')]));
 
-P(h2('11.4  Level 3 — two-phase reactive flow'));
+P(h2('12.4  Level 3 — two-phase reactive flow'));
 P(p([tx('The reference formulation used in modern gun design (NGEN, XKTC, and their '
   + 'descendants) treats gas and solid propellant as two interpenetrating continua, each '
   + 'with its own velocity, with mass, momentum and energy exchange between them, '
@@ -950,7 +1157,7 @@ P(p([bd('What it costs: '), tx('a substantially larger parameter set — interph
   + 'commercial propellants and must be measured. For the barrel-length question posed here '
   + 'it would add cost without adding accuracy.')]));
 
-P(h2('11.5  Targeted improvements worth more than a level change'));
+P(h2('12.5  Targeted improvements worth more than a level change'));
 P(p([bd('1. A measured bore-resistance curve. '), tx('Replacing the constant p_r with a '
   + 'travel-dependent function p_r(x) — engraving spike, plateau, velocity-dependent rise — '
   + 'is a small code change and would let the model reproduce the velocity roll-over at long '
@@ -974,7 +1181,7 @@ P(p([bd('5. Muzzle and after-effect modelling. '), tx('The present model stops a
   { indent: { left: 340 } }));
 
 /* ------------------------------------------------------- 12. simulator ---- */
-P(h1('12  The companion simulator'));
+P(h1('13  The companion simulator'));
 P(p([tx('The file '), it('web/ballistics.html'), tx(' is a single self-contained HTML '
   + 'document — no server, no build step, no external libraries. Opening it in any modern '
   + 'browser gives an interactive implementation of exactly the model derived above; the '
@@ -1001,14 +1208,14 @@ P(p('Every parameter in §7 is exposed as a slider, grouped by category, with th
   + 'and case volume imply a packing fraction above what spheres can achieve — or when peak '
   + 'pressure exceeds the NATO limit.'));
 P(...figure('screen_shot.png',
-  'Figure 10 — The single-shot tab of the simulator. The overlaid pressure curves for 10.5 in, '
+  'Figure 12 — The single-shot tab of the simulator. The overlaid pressure curves for 10.5 in, '
   + '14.5 in and 20 in barrels coincide exactly, each terminating at its own muzzle-exit '
   + 'point.', 6.3));
 P(...figure('screen_sweep.png',
-  'Figure 11 — The barrel-length sweep tab, with published chronograph and uncorking-pressure '
+  'Figure 13 — The barrel-length sweep tab, with published chronograph and uncorking-pressure '
   + 'measurements overlaid on the model curves.', 6.3));
 
-P(h2('12.1  Repository layout'));
+P(h2('13.1  Repository layout'));
 P(table(
   ['Path', 'Contents'],
   [
@@ -1024,7 +1231,7 @@ P(table(
   [3400, 6600], { leftCols: 2 }));
 
 /* ------------------------------------------------------- 13. references --- */
-P(h1('13  References'));
+P(h1('14  References'));
 P(p('Sources are grouped by what they were used for. Web sources were accessed in August 2026.'));
 
 P(h3('Measured performance data'));
@@ -1038,6 +1245,15 @@ P(h3('Measured performance data'));
     'https://sadefensejournal.com/barrel-length-studies-in-5-56mm-nato-weapons/2/'],
   ['The Firearm Blog, "Cartridge Test 008: PMC M855 5.56×45 mm 62 gr, 16 and 20 in barrels".',
     'https://www.thefirearmblog.com/blog/2018/01/09/cartridge-test-008-pmc-m855/'],
+  ['Larson Davis, "Firearm Sound Suppression: Nature and Measuring of Firearm Sounds" — '
+    + 'the muzzle-blast / ballistic-crack distinction, and the measured reference levels '
+    + 'used in §11 (162–163 dB peak at 1 m for an AR-15 in .223; suppressed M855 at '
+    + '148.5 dB, 55 yd downrange).',
+    'https://www.larsondavis.com/ContentStore/mktg/LD_Docs/Firearm_Sound_Briefing.pdf'],
+  ['PEW Science, "Unsuppressed Rifles; the 14.5-in M4A1 Mid-Gas as a Silencer Test Host" — '
+    + 'pressure and impulse waveforms 1 m left of the muzzle, and the secondary blast wave '
+    + 'observed from short 5.56 barrels.',
+    'https://pewscience.com/sound-signature-reviews-free/sss-6-127-research-supplement-unsuppressed-rifle-and-m4a1'],
   ['P. Dater, "Suppressor Design and Muzzle Pressure", NDIA Armament Systems Forum — '
     + 'method and instrumentation for muzzle-port pressure measurement.',
     'https://ndia.dtic.mil/wp-content/uploads/2010/armament/WednesdayCumberlandPhilipDater.pdf'],
@@ -1083,6 +1299,10 @@ P(h3('Standard texts (not accessed online; cited for the classical formulation)'
     + 'origin of the form-function notation ψ = χz(1 + λz + μz²) used here.',
   'J. Corner, "Theory of the Interior Ballistics of Guns", Wiley (1950) — the Résal equation '
     + 'and the Lagrange gradient in their classical form.',
+  'G. B. Whitham, "The flow pattern of a supersonic projectile", Communications on Pure and '
+    + 'Applied Mathematics 5 (1952) 301 — the N-wave far-field solution behind Eq. (24).',
+  'H. L. Brode, "Numerical solutions of spherical blast waves", Journal of Applied Physics 26 '
+    + '(1955) 766 — the free-air blast relation referred to in §11.4.',
 ].forEach(t => P(p(t, { indent: { left: 340 } })));
 
 P(h2('Disclaimer'));

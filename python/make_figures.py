@@ -1,6 +1,7 @@
 """Generate the figures used in doc/5.56_interior_ballistics.docx."""
 import json
 import math
+import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -247,6 +248,89 @@ ax.set_title("Form function $\\psi(z)=\\chi z(1+\\lambda z)$ for different grain
 ax.legend(loc="upper left")
 style(ax)
 fig.savefig(f"{OUT}/fig8_form.png")
+plt.close(fig)
+
+# ------------------------------------------------ figures: muzzle noise
+P0_ATM, C0_SND, TNT = 101325.0, 343.0, 4.184e6
+D_BUL, L_BUL = 5.70e-3, 23.0e-3
+dBof = lambda p: 20 * math.log10(p / 2e-5)
+paOf = lambda db: 10 ** (db / 20) * 2e-5
+P_REF = paOf(162.5)          # measured AR-15 .223 peak, 1 m left of the muzzle
+
+
+def noise_source(L):
+    """Blast source energy and Mach number at the muzzle for a given barrel."""
+    c = Charge(L_barrel=L * IN)
+    r = simulate(c, dt=1e-7, store_every=10 ** 9)
+    b = energy_budget(c, r)
+    p1, V1 = r["p_muzzle_mean"], r["V_exit"]
+    W = (p1 * V1 / c.theta * (1 - (P0_ATM / p1) ** (c.theta / c.gamma))
+         + b["gas_kinetic"] + b["unburnt"])
+    return r["v_muzzle"], r["v_muzzle"] / C0_SND, W
+
+
+V20N, M20N, W20N = noise_source(20.0)
+blast_p = lambda W, R: P_REF * math.sqrt(W / W20N) / R
+crack_p = lambda M, r: (0.53 * D_BUL * (M * M - 1) ** 0.125
+                        / (r ** 0.75 * L_BUL ** 0.25) * P0_ATM)
+
+# --- figure 10: the two sources versus distance -------------------------
+RS = [1 * 1.2 ** i for i in range(30)]
+fig, ax = plt.subplots(figsize=(6.4, 3.6))
+ax.loglog(RS, [blast_p(W20N, r) for r in RS], color=C["s1"], lw=2.2,
+          label="muzzle blast  ($\\propto 1/R$, distance from the muzzle)")
+ax.loglog(RS, [crack_p(M20N, r) for r in RS], color=C["s2"], lw=2.2,
+          label="ballistic crack  ($\\propto r^{-3/4}$, miss distance)")
+xc = 50.0
+ax.axvline(xc, color=C["muted"], lw=0.9, ls=":")
+ax.annotate("the two are equal\nnear 50 m", (xc, 250), fontsize=7.8, color=C["sec"],
+            ha="center", va="bottom", linespacing=1.4)
+for r0 in (1, 10, 100):
+    bp, cp = blast_p(W20N, r0), crack_p(M20N, r0)
+    ax.plot(r0, bp, "o", color=C["s1"], ms=5.5, mec="white", mew=1.4, zorder=5)
+    ax.plot(r0, cp, "o", color=C["s2"], ms=5.5, mec="white", mew=1.4, zorder=5)
+    ax.annotate(f"{dBof(bp):.0f} dB", (r0, bp), textcoords="offset points",
+                xytext=(7, 5), fontsize=7.6, color=C["s1"], fontweight="bold")
+    ax.annotate(f"{dBof(cp):.0f} dB", (r0, cp), textcoords="offset points",
+                xytext=(7, -12), fontsize=7.6, color=C["s2"], fontweight="bold")
+ax.set_xlabel("distance (m)")
+ax.set_ylabel("peak overpressure (Pa)")
+ax.set_title("Muzzle blast and ballistic crack, 20 in barrel")
+ax.grid(True, which="both", axis="both")
+ax.set_axisbelow(True)
+for sp in ("top", "right"):
+    ax.spines[sp].set_visible(False)
+ax.legend(loc="lower left")
+fig.savefig(f"{OUT}/fig10_noise_distance.png")
+plt.close(fig)
+
+# --- figure 11: noise versus barrel length ------------------------------
+LN = [5 + (26 - 5) * i / 41 for i in range(42)]
+ear, blast1m, crack1m = [], [], []
+for L in LN:
+    v, M, W = noise_source(L)
+    blast1m.append(dBof(blast_p(W, 1.0)))
+    crack1m.append(dBof(crack_p(M, 1.0)))
+    ear.append(dBof(blast_p(W, 0.95 - (20.0 - L) * 0.0254)))
+fig, ax = plt.subplots(figsize=(6.4, 3.6))
+ax.plot(LN, ear, color=C["s8"], lw=2.3, label="muzzle blast at the shooter's ear")
+ax.plot(LN, blast1m, color=C["s1"], lw=2.0, ls="--",
+        label="muzzle blast, fixed 1 m station")
+ax.plot(LN, crack1m, color=C["s2"], lw=2.0,
+        label="ballistic crack, 1 m miss distance")
+for L in (10.5, 14.5, 20.0):
+    v, M, W = noise_source(L)
+    e = dBof(blast_p(W, 0.95 - (20.0 - L) * 0.0254))
+    ax.plot(L, e, "o", color=C["s8"], ms=6, mec="white", mew=1.5, zorder=5)
+    ax.annotate(f"{L:g} in\n{e:.1f} dB", (L, e), textcoords="offset points",
+                xytext=(6, 4), fontsize=7.6, color=C["sec"], linespacing=1.4)
+ax.set_xlabel("barrel length from bolt face  $L_\\mathrm{b}$  (in)")
+ax.set_ylabel("peak sound level (dB)")
+ax.set_title("Why a short barrel is louder — and the crack does not care")
+ax.set_xlim(5, 26)
+style(ax)
+ax.legend(loc="upper right")
+fig.savefig(f"{OUT}/fig11_noise_barrel.png")
 plt.close(fig)
 
 # ---------------------------------------------------------------- exports

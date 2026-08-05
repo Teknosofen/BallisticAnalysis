@@ -41,3 +41,11 @@ $$\frac{dz}{dt}=\frac{a}{e_{1}}\,\bar{p}^{\,n},\qquad\qquad\frac{dx}{dt}=v$$
 $$\frac{dv}{dt}=\frac{A\left(\bar{p}-p_{r}\right)}{\varphi\,m_{b}},\qquad\frac{dQ}{dt}=h\,S(x)\left(T-T_{w}\right)$$
 
 $$x_{max}=L_{b}-x_{b0}$$
+
+$$W_{blast}=\frac{p_{m}V_{\psi}}{\theta}\left[1-\left(\frac{p_{0}}{p_{m}}\right)^{\theta/\gamma}\right]+\frac{1}{6}m_{c}v_{m}^{2}$$
+
+$$\frac{\Delta p}{p_{0}}=0.53\,\frac{d\left(M^{2}-1\right)^{1/8}}{r^{3/4}\,l^{1/4}},\qquad M=\frac{v_{m}}{c_{0}}$$
+
+$$\mu=\arcsin\frac{1}{M}$$
+
+$$\Delta p_{blast}\propto\frac{1}{R},\qquad\Delta p_{crack}\propto r^{-3/4}$$
